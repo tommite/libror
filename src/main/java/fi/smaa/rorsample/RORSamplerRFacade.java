@@ -9,10 +9,11 @@ public class RORSamplerRFacade {
 
 	/**
 	 * @param matrix matrix in row-major representation
-	 * @param nRows
+	 * @param nRows > 0
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RORSamplerRFacade(double[] matrix, int nRows, int count) {
+		assert(nRows > 0);
 		int nCols = matrix.length / nRows;
 		assert(matrix.length == nRows * nCols);
 		RealMatrix perfMatrix = new Array2DRowRealMatrix(nRows, nCols);
