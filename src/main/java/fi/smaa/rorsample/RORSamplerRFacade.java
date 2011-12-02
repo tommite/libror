@@ -61,4 +61,8 @@ public class RORSamplerRFacade {
 	public void addPreference(int a, int b) {
 		sampler.addPreference(a, b);
 	}
+	
+	public int getMisses() {
+		return sampler.getMisses();
+	}
 }

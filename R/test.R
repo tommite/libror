@@ -1,8 +1,8 @@
 library('rJava')
 .jinit(classpath="../target/rorsample-0.1-SNAPSHOT-jar-with-dependencies.jar")
 
-createROR <- function(perfMat) {
-  .jnew("fi/smaa/rorsample/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(10000))
+createROR <- function(perfMat, nrSamples) {
+  .jnew("fi/smaa/rorsample/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
 }
 
 getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
@@ -50,17 +50,23 @@ evaluateAlternative <- function(ror, vfIndex, altIndex) {
   .jcall(ror, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
 }
 
+getMisses <- function(ror) {
+  .jcall(ror, "I", method="getMisses")
+}
+
 addPreference <- function(ror, a, b) {
   .jcall(ror, "V", method="addPreference", as.integer(a), as.integer(b))
-}  
-                                                               
+}
+
+nrSamples = 10000
 p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
-ror <- createROR(p)
+ror <- createROR(p, nrSamples)
 addPreference(ror, 1, 2)
 addPreference(ror, 4, 5)
 addPreference(ror, 7, 8)
 addPreference(ror, 1, 3)
-
 sampleROR(ror)
+message(paste(getMisses(ror), "rejected samples when generating", nrSamples, "value functions"))
+
 
 

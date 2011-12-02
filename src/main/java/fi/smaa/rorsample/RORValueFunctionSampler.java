@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.ArrayRealVector;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.linear.RealVector;
@@ -20,8 +19,8 @@ public class RORValueFunctionSampler {
 	private FullValueFunction[] vfs;
 	
 	MersenneTwister rng = new MersenneTwister(0x667);
-	
 	double[] w;
+	private int misses;
 	
 	private class PrefPair {
 		public PrefPair(int a2, int b2) {
@@ -85,15 +84,22 @@ public class RORValueFunctionSampler {
 	 * 
 	 */
 	public void sample() {		
+		misses = 0;
 		for (int i=0;i<vfs.length;i++) {
 			while (true) {
 				FullValueFunction vf = sampleValueFunction();
 				if (isHit(vf)) {
 					vfs[i] = vf;
 					break;
+				} else {
+					misses++;
 				}
 			}
 		}
+	}
+	
+	public int getMisses() {
+		return misses;
 	}
 	
 	private boolean isHit(FullValueFunction vf) {
