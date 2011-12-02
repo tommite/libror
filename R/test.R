@@ -44,7 +44,23 @@ allValueFunctions <- function(ror, perfMat) {
 sampleROR <- function(ror) {
   .jcall(ror, method="sample")
 }
+
+evaluateAlternative <- function(ror, vfIndex, altIndex) {
+  altIndex = altIndex -1
+  .jcall(ror, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
+}
+
+addPreference <- function(ror, a, b) {
+  .jcall(ror, "V", method="addPreference", as.integer(a), as.integer(b))
+}  
                                                                
-p <- matrix(runif(n=50), nrow=10)
+p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 ror <- createROR(p)
+addPreference(ror, 1, 2)
+addPreference(ror, 4, 5)
+addPreference(ror, 7, 8)
+addPreference(ror, 1, 3)
+
 sampleROR(ror)
+
+

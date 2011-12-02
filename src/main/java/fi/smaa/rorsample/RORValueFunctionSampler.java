@@ -48,6 +48,10 @@ public class RORValueFunctionSampler {
 		w = new double[getNrCriteria()];
 		vfs = new FullValueFunction[count];
 	}
+	
+	public RealMatrix getPerfMatrix() {
+		return perfMatrix;
+	}
 
 	private void initializeLevels(RealMatrix perfMatrix) {
 		levels = new RealVector[perfMatrix.getColumnDimension()];
@@ -82,10 +86,31 @@ public class RORValueFunctionSampler {
 	 */
 	public void sample() {		
 		for (int i=0;i<vfs.length;i++) {
-			vfs[i] = sampleValueFunction();
+			while (true) {
+				FullValueFunction vf = sampleValueFunction();
+				if (isHit(vf)) {
+					vfs[i] = vf;
+					break;
+				}
+			}
 		}
 	}
 	
+	private boolean isHit(FullValueFunction vf) {
+		double[] values = new double[getNrAlternatives()];	
+		for (int i=0;i<values.length;i++) {
+			values[i] = vf.evaluate(perfMatrix.getRow(i));
+		}
+		
+		for (PrefPair p : prefPairs) {
+			if (values[p.a]< values[p.b]) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
 	public FullValueFunction[] getValueFunctions() {
 		return vfs;
 	}

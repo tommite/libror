@@ -25,4 +25,14 @@ public class FullValueFunction {
 	public List<PartialValueFunction> getPartialValueFunctions() {
 		return vfs;
 	}
+	
+	public double evaluate(double[] point) {
+		assert(point.length == vfs.size());
+		
+		double sum = 0.0;
+		for (int i=0;i<point.length;i++) {
+			sum += vfs.get(i).evaluate(point[i]);
+		}
+		return sum;
+	}
 }

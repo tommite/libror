@@ -46,5 +46,19 @@ public class RORSamplerRFacade {
 	public int getNrPartialValueFunctions() {
 		return sampler.getValueFunctions()[0].getPartialValueFunctions().size();
 	}
-
+	
+	public double evaluate(int vfIndex, double[] point) {
+		return sampler.getValueFunctions()[vfIndex].evaluate(point);
+	}
+	
+	public double evaluateAlternative(int vfIndex, int alternative) {
+		assert(alternative >= 0);
+		RealMatrix pm = sampler.getPerfMatrix();
+		double[] alt = pm.getRow(alternative);
+		return sampler.getValueFunctions()[vfIndex].evaluate(alt);
+	}
+	
+	public void addPreference(int a, int b) {
+		sampler.addPreference(a, b);
+	}
 }
