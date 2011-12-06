@@ -1,9 +1,11 @@
-package fi.smaa.rorsample;
+package fi.smaa.libror;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fi.smaa.libror.PartialValueFunction;
 
 public class PartialValueFunctionTest {
 	

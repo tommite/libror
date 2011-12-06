@@ -1,4 +1,4 @@
-package fi.smaa.rorsample;
+package fi.smaa.libror;
 
 import java.util.ArrayList;
 import java.util.List;

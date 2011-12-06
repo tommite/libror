@@ -1,4 +1,4 @@
-package fi.smaa.rorsample;
+package fi.smaa.libror;
 
 import static org.junit.Assert.*;
 
@@ -8,6 +8,8 @@ import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
+
+import fi.smaa.libror.RORValueFunctionSampler;
 
 public class RORValueFunctionSamplerTest {
 

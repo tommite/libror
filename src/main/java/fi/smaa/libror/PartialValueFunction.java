@@ -1,4 +1,4 @@
-package fi.smaa.rorsample;
+package fi.smaa.libror;
 
 public class PartialValueFunction {
 	

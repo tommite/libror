@@ -1,4 +1,4 @@
-package fi.smaa.rorsample;
+package fi.smaa.libror;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
