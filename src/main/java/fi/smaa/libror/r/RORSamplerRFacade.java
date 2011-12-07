@@ -1,7 +1,9 @@
-package fi.smaa.libror;
+package fi.smaa.libror.r;
 
-import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
+
+import fi.smaa.libror.PartialValueFunction;
+import fi.smaa.libror.RORValueFunctionSampler;
 
 public class RORSamplerRFacade {
 	
@@ -13,18 +15,10 @@ public class RORSamplerRFacade {
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RORSamplerRFacade(double[] matrix, int nRows, int count) {
-		assert(nRows > 0);
-		int nCols = matrix.length / nRows;
-		assert(matrix.length == nRows * nCols);
-		RealMatrix perfMatrix = new Array2DRowRealMatrix(nRows, nCols);
-		for (int i=0;i<nRows;i++) {
-			for (int j=0;j<nCols;j++) {
-				perfMatrix.setEntry(i, j, matrix[i*nCols + j]);
-			}
-		}
+		RealMatrix perfMatrix = RHelper.rArrayMatrixToRealMatrix(matrix, nRows);
 		sampler = new RORValueFunctionSampler(perfMatrix, count);
 	}
-	
+
 	public void sample() {
 		sampler.sample();
 	}

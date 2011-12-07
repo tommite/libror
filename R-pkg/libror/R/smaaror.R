@@ -2,7 +2,7 @@ library('rJava')
 .jinit(classpath="../../../target/libror-0.1-SNAPSHOT-jar-with-dependencies.jar")
 
 smaaror.createROR <- function(perfMat, nrSamples) {
-  .jnew("fi/smaa/rorsample/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
+  .jnew("fi/smaa/libror/r/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
 }
 
 smaaror.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {

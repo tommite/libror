@@ -41,10 +41,10 @@ public class UTAGMSSolver extends RORModel {
 		}
 	}
 	
-	public void printNecessaryModel(int a, int b) {
-		List<LinearConstraint> baseConstraints = buildRORConstraints();
-		baseConstraints.add(buildPreferredConstraint(a, b));
-		LinearConstraintHelper.printConstraints(baseConstraints);
+	public void printModel(boolean necessary, int a, int b) {
+		List<LinearConstraint> constraints = buildRORConstraints();
+		addNecOrPrefConstraint(a, b, necessary, constraints);
+		LinearConstraintHelper.printConstraints(constraints);
 	}
 
 	List<LinearConstraint> buildRORConstraints() {
@@ -154,11 +154,7 @@ public class UTAGMSSolver extends RORModel {
 		}
 		
 		List<LinearConstraint> constraints = new ArrayList<LinearConstraint>(rorConstraints);
-		if (necessary) {
-			constraints.add(buildPreferredConstraint(i, j));
-		} else { // possible
-			constraints.add(buildPossiblePreferenceConstraint(i, j));
-		}
+		addNecOrPrefConstraint(i, j, necessary, constraints);
 		double[] coeff = new double[getNrLPVariables()];
 		coeff[coeff.length-1] = 1.0;
 		LinearObjectiveFunction goalFunction = new LinearObjectiveFunction(coeff, 0.0);
@@ -171,6 +167,15 @@ public class UTAGMSSolver extends RORModel {
 			result = false;
 		}
 		return necessary ? result : !result;
+	}
+
+	private void addNecOrPrefConstraint(int i, int j, boolean necessary,
+			List<LinearConstraint> constraints) {
+		if (necessary) {
+			constraints.add(buildPreferredConstraint(i, j));
+		} else { // possible
+			constraints.add(buildPossiblePreferenceConstraint(i, j));
+		}
 	}
 
 	private LinearConstraint buildPossiblePreferenceConstraint(int a, int b) {
@@ -200,9 +205,9 @@ public class UTAGMSSolver extends RORModel {
 	 * @throws IllegalStateException if solve() hasn't been succesfully executed 
 	 */
 	public RealMatrix getPossibleRelation() {
-		if (necessaryRelation == null) {
+		if (possibleRelation == null) {
 			throw new IllegalStateException("violating PRECOND");
 		}
-		return necessaryRelation;
+		return possibleRelation;
 	}
 }
