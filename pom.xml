@@ -2,8 +2,8 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>fi.smaa</groupId>
-  <artifactId>rorsample</artifactId>
-  <name>RORSampler</name>
+  <artifactId>libror</artifactId>
+  <name>libror</name>
   <version>0.1-SNAPSHOT</version>
 
   <repositories>
