@@ -13,7 +13,7 @@ public class LinearConstraintHelper {
 				sb.append(" + ");
 			}
 			sb.append(c.getCoefficients().getData()[i]);			
-			sb.append(" * x");
+			sb.append("*x");
 			sb.append(i);
 		}
 		sb.append(" ");
@@ -28,9 +28,11 @@ public class LinearConstraintHelper {
 	}
 	
 	public static void printConstraints(List<LinearConstraint> consts) {
+		int index = 1;
 		for (LinearConstraint c : consts) {
+			System.out.print("[C"+index+"] ");
 			printConstraint(c);
-			System.out.println("\n");
+			index++;
 		}
 	}
 }

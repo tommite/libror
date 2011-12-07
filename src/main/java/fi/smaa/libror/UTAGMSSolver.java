@@ -38,6 +38,12 @@ public class UTAGMSSolver extends RORModel {
 			}
 		}
 	}
+	
+	public void printNecessaryModel(int a, int b) {
+		List<LinearConstraint> baseConstraints = buildRORConstraints();
+		baseConstraints.add(buildPreferredConstraint(a, b));
+		LinearConstraintHelper.printConstraints(baseConstraints);
+	}
 
 	List<LinearConstraint> buildRORConstraints() {
 		List<LinearConstraint> c = new ArrayList<LinearConstraint>();

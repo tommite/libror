@@ -29,6 +29,7 @@ public class UTAGMSSolverTest {
 		
 	@Test
 	public void testCorrectResults() {
+		solver.printNecessaryModel(1, 2);
 		solver.solve();
 		RealMatrix nrel = solver.getNecessaryRelation();
 		System.out.println(nrel);
