@@ -1,29 +1,29 @@
 library('rJava')
-.jinit(classpath="../target/rorsample-0.1-SNAPSHOT-jar-with-dependencies.jar")
+.jinit(classpath="../../../target/libror-0.1-SNAPSHOT-jar-with-dependencies.jar")
 
-createROR <- function(perfMat, nrSamples) {
+smaaror.createROR <- function(perfMat, nrSamples) {
   .jnew("fi/smaa/rorsample/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
 }
 
-getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
+smaaror.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
   partialVfIndex = partialVfIndex - 1
   vfIndex = vfIndex - 1
   .jcall(ror, "[D", method="getValueFunctionVals", as.integer(vfIndex), as.integer(partialVfIndex))
 }
 
-getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
+smaaror.getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
   partialVfIndex = partialVfIndex - 1
   vfIndex = vfIndex - 1
   .jcall(ror, "[D", method="getValueFunctionEvals", as.integer(vfIndex), as.integer(partialVfIndex))
 }
 
-singleValueFunction <- function(ror, index) {
+smaaror.singleValueFunction <- function(ror, index) {
   nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
   v <- c()
   e <- c()
   for (i in 1:nPartVf) {
-    vals <- getValueFunctionVals(ror, index, i)
-    evals <- getValueFunctionEvals(ror, index, i)
+    vals <- smaaror.getValueFunctionVals(ror, index, i)
+    evals <- smaaror.getValueFunctionEvals(ror, index, i)
 
     v <- rbind(v, vals)
     e <- rbind(e, evals)    
@@ -31,17 +31,17 @@ singleValueFunction <- function(ror, index) {
   list(vals=v, evals=e)
 }
 
-allValueFunctions <- function(ror, perfMat) {
+smaaror.allValueFunctions <- function(ror, perfMat) {
   nAlt <- dim(perfMat)[1]
   nCrit <- dim(perfMat)[2]
   nVf <- .jcall(ror, "I", method="getNrValueFunctions")
   nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
   ret <- list()
 
-  lapply(seq(1, nVf), function(x) {singleValueFunction(ror, x)})
+  lapply(seq(1, nVf), function(x) {smaaror.singleValueFunction(ror, x)})
 }
 
-sampleROR <- function(ror) {
+smaaror.sampleROR <- function(ror) {
   .jcall(ror, method="sample")
 }
 
@@ -50,23 +50,13 @@ evaluateAlternative <- function(ror, vfIndex, altIndex) {
   .jcall(ror, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
 }
 
-getMisses <- function(ror) {
+smaaror.getMisses <- function(ror) {
   .jcall(ror, "I", method="getMisses")
 }
 
-addPreference <- function(ror, a, b) {
+smaaror.addPreference <- function(ror, a, b) {
   .jcall(ror, "V", method="addPreference", as.integer(a), as.integer(b))
 }
-
-nrSamples = 10000
-p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
-ror <- createROR(p, nrSamples)
-addPreference(ror, 1, 2)
-addPreference(ror, 4, 5)
-addPreference(ror, 7, 8)
-addPreference(ror, 1, 3)
-sampleROR(ror)
-message(paste(getMisses(ror), "rejected samples when generating", nrSamples, "value functions"))
 
 
 
