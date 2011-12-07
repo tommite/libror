@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
+import org.apache.commons.math.linear.MatrixUtils;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.Relationship;
@@ -28,8 +29,8 @@ public class UTAGMSSolverTest {
 	}
 		
 	@Test
-	public void testCorrectResults() {
-		solver.printNecessaryModel(1, 2);
+	public void testNecessaryRelationResults() {
+		//solver.printNecessaryModel(1, 2);
 		solver.solve();
 		RealMatrix nrel = solver.getNecessaryRelation();
 		System.out.println(nrel);
@@ -37,6 +38,17 @@ public class UTAGMSSolverTest {
 		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
 		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
 	}
+	
+	@Test
+	public void testPossibleRelationResults() {
+		//solver.printNecessaryModel(1, 2);
+		solver.solve();
+		RealMatrix nrel = solver.getPossibleRelation();
+		System.out.println(nrel);
+		assertArrayEquals(new double[]{1.0, 0.0, 0.0}, nrel.getRow(0), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
+	}	
 	
 	@Test
 	public void testBuildRORConstraints() {

@@ -16,9 +16,11 @@ import org.apache.commons.math.optimization.linear.Relationship;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
 
 
+@SuppressWarnings("deprecation")
 public class UTAGMSSolver extends RORModel {
 
 	private RealMatrix necessaryRelation = null;
+	private RealMatrix possibleRelation = null;
 	private SimplexSolver solver = new SimplexSolver();
 
 	public UTAGMSSolver(RealMatrix perfMatrix) {
@@ -27,14 +29,14 @@ public class UTAGMSSolver extends RORModel {
 
 	public void solve() {
 		necessaryRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrCriteria());
+		possibleRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrCriteria());
 		List<LinearConstraint> baseConstraints = buildRORConstraints();
 		for (int i=0;i<getNrAlternatives();i++) {
 			for (int j=0;j<getNrAlternatives();j++) {
-				if (i == j) {
-					necessaryRelation.setEntry(i, j, 1.0);
-				} else {
-					necessaryRelation.setEntry(i, j, solveNecessaryRelation(i, j, baseConstraints)? 1.0 : 0.0);
-				}
+				necessaryRelation.setEntry(i, j,
+						solveRelation(i, j, baseConstraints, true)? 1.0 : 0.0);
+				possibleRelation.setEntry(i, j,
+						solveRelation(i, j, baseConstraints, false)? 1.0 : 0.0);				
 			}
 		}
 	}
@@ -138,28 +140,46 @@ public class UTAGMSSolver extends RORModel {
 	/**
 	 * Check whether necessary relation holds.
 	 * 
-	 * PRECOND: i != j
 	 * @param i index of first alternative
 	 * @param j index of the second alternative
 	 * @param rorConstraints base constraints E_{ROR}^{A^R}
+	 * @param necessary TODO
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
-	private boolean solveNecessaryRelation(int i, int j, List<LinearConstraint> rorConstraints) {
-		assert(i != j);
+	private boolean solveRelation(int i, int j, List<LinearConstraint> rorConstraints, boolean necessary) {
+		assert (i >= 0 && j >= 0);
+		
+		if (i ==j) {
+			return true;
+		}
 		
 		List<LinearConstraint> constraints = new ArrayList<LinearConstraint>(rorConstraints);
-		constraints.add(buildPreferredConstraint(i, j));
+		if (necessary) {
+			constraints.add(buildPreferredConstraint(i, j));
+		} else { // possible
+			constraints.add(buildPossiblePreferenceConstraint(i, j));
+		}
 		double[] coeff = new double[getNrLPVariables()];
 		coeff[coeff.length-1] = 1.0;
 		LinearObjectiveFunction goalFunction = new LinearObjectiveFunction(coeff, 0.0);
 		
+		boolean result = false;
 		try {
 			RealPointValuePair res = solver.optimize(goalFunction, constraints, GoalType.MAXIMIZE, true);
-			return res.getValue() >= 0.0;
+			result = res.getValue() >= 0.0;
 		} catch (OptimizationException e) {
-			return false;
+			result = false;
 		}
+		return necessary ? result : !result;
+	}
+
+	private LinearConstraint buildPossiblePreferenceConstraint(int a, int b) {
+		double[] lhsVars = new double[getNrLPVariables()];
+		double[] rhsVars = new double[getNrLPVariables()];
+		setVarsPositive(lhsVars, a);
+		setVarsPositive(rhsVars, b);
+		// set epsilon
+		return new LinearConstraint(lhsVars, 0.0, Relationship.GEQ, rhsVars, 0.0);		
 	}
 
 	/**
@@ -168,6 +188,18 @@ public class UTAGMSSolver extends RORModel {
 	 * @throws IllegalStateException if solve() hasn't been succesfully executed 
 	 */
 	public RealMatrix getNecessaryRelation() throws IllegalStateException {
+		if (necessaryRelation == null) {
+			throw new IllegalStateException("violating PRECOND");
+		}
+		return necessaryRelation;
+	}
+
+	/**
+	 * PRECOND: solve() executed and returned true
+	 * @return a matrix where >0.0 (1.0) signifies that the relation holds
+	 * @throws IllegalStateException if solve() hasn't been succesfully executed 
+	 */
+	public RealMatrix getPossibleRelation() {
 		if (necessaryRelation == null) {
 			throw new IllegalStateException("violating PRECOND");
 		}
