@@ -50,7 +50,7 @@ public class UTAGMSSolver extends RORModel {
 	List<LinearConstraint> buildRORConstraints() {
 		List<LinearConstraint> c = new ArrayList<LinearConstraint>();
 		for (PrefPair p : prefPairs) {
-			c.add(buildPreferredConstraint(p.a, p.b));
+			c.add(buildStrictlyPreferredConstraint(p.a, p.b));
 		}
 		for (int i=0;i<getNrCriteria();i++) {
 			c.addAll(buildMonotonousConstraints(i));
@@ -58,19 +58,15 @@ public class UTAGMSSolver extends RORModel {
 		for (int i=0;i<getNrCriteria();i++) {
 			c.add(buildFirstLevelZeroConstraint(i));
 		}
-		for (int i=0;i<getNrCriteria();i++) {
-			c.add(buildLevelsAddToUnityConstraint(i));
-		}
+		c.add(buildBestLevelsAddToUnityConstraint());
 		
 		return c;
 	}
 
-	private LinearConstraint buildLevelsAddToUnityConstraint(int critIndex) {
-		RealVector levels = getLevels()[critIndex];
-		int offset = getConstraintOffset(critIndex);
+	private LinearConstraint buildBestLevelsAddToUnityConstraint() {
 		double[] vars = new double[getNrLPVariables()];		
-		for (int i=0;i<levels.getDimension();i++) {
-			vars[offset + i] = 1.0;
+		for (int i=0;i<getNrCriteria();i++) {
+			vars[getConstraintOffset(i) + getLevels()[i].getDimension() - 1] = 1.0;
 		}
 		return new LinearConstraint(vars, Relationship.EQ, 1.0);		
 	}
@@ -94,7 +90,13 @@ public class UTAGMSSolver extends RORModel {
 		return constList;
 	}
 
-	private LinearConstraint buildPreferredConstraint(int a, int b) {
+	/**
+	 * a is strictly preferred to b (v(a) >= v(b) + epsilon)
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private LinearConstraint buildStrictlyPreferredConstraint(int a, int b) {
 		double[] lhsVars = new double[getNrLPVariables()];
 		double[] rhsVars = new double[getNrLPVariables()];
 		setVarsPositive(lhsVars, a);
@@ -159,26 +161,33 @@ public class UTAGMSSolver extends RORModel {
 		coeff[coeff.length-1] = 1.0;
 		LinearObjectiveFunction goalFunction = new LinearObjectiveFunction(coeff, 0.0);
 		
-		boolean result = false;
 		try {
 			RealPointValuePair res = solver.optimize(goalFunction, constraints, GoalType.MAXIMIZE, true);
-			result = res.getValue() >= 0.0;
+			if (necessary) {
+				return res.getValue() <= 0.0;
+			} else { // possible
+				return res.getValue() > 0.0;
+			}
+			
 		} catch (OptimizationException e) {
-			result = false;
+			if (necessary) {
+				return true;
+			} else { // possible
+				return false;
+			}
 		}
-		return necessary ? result : !result;
 	}
 
 	private void addNecOrPrefConstraint(int i, int j, boolean necessary,
 			List<LinearConstraint> constraints) {
 		if (necessary) {
-			constraints.add(buildPreferredConstraint(i, j));
+			constraints.add(buildStrictlyPreferredConstraint(j, i));
 		} else { // possible
-			constraints.add(buildPossiblePreferenceConstraint(i, j));
+			constraints.add(buildWeaklyPreferredConstraint(i, j));
 		}
 	}
 
-	private LinearConstraint buildPossiblePreferenceConstraint(int a, int b) {
+	private LinearConstraint buildWeaklyPreferredConstraint(int a, int b) {
 		double[] lhsVars = new double[getNrLPVariables()];
 		double[] rhsVars = new double[getNrLPVariables()];
 		setVarsPositive(lhsVars, a);

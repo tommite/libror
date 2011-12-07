@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
-import org.apache.commons.math.linear.MatrixUtils;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.Relationship;
@@ -25,28 +24,25 @@ public class UTAGMSSolverTest {
 		perfMatrix.setRow(1, new double[] {2.0, 1.0, 1.1});
 		perfMatrix.setRow(2, new double[] {2.0, 0.5, 3.0});
 		solver = new UTAGMSSolver(perfMatrix);
-		solver.addPreference(2, 1); // a3 >= a2
+		solver.addPreference(2, 1); // a3 > a2
 	}
 		
+	@Test
 	public void testNecessaryRelationResults() {
-		//solver.printNecessaryModel(1, 2);
 		solver.solve();
 		RealMatrix nrel = solver.getNecessaryRelation();
-		System.out.println(nrel);
 		assertArrayEquals(new double[]{1.0, 0.0, 0.0}, nrel.getRow(0), 0.0001); 
-//		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
 		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
 	}
 	
 	@Test
 	public void testPossibleRelationResults() {
-		//solver.printNecessaryModel(1, 2);
 		solver.solve();
 		RealMatrix nrel = solver.getPossibleRelation();
-		//System.out.println(nrel);
-		//assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(0), 0.0001); 
-		//assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
-		//assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(0), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
 	}	
 	
 	@Test
@@ -86,21 +82,16 @@ public class UTAGMSSolverTest {
 			assertArrayEquals(vals, lc.getCoefficients().getData(), 0.00001);
 			cIndex++;
 		}
-		// constraints for levels summing to unity
-		offset = 0;
-		for (int i=0;i<solver.getNrCriteria();i++) {
-			LinearConstraint lc = c.get(cIndex);
-			cIndex++;
-			assertEquals(Relationship.EQ, lc.getRelationship());
-			assertEquals(1.0, lc.getValue(), 0.000001);			
+		// constraints for best levels summing to unity
+		LinearConstraint lc = c.get(cIndex);
+		cIndex++;
+		assertEquals(Relationship.EQ, lc.getRelationship());
+		assertEquals(1.0, lc.getValue(), 0.000001);			
 			
-			double[] vals = new double[8];
-			for (int j=0;j<solver.getLevels()[i].getDimension();j++) {
-				vals[offset] = 1.0;
-				offset++;
-			}
-			assertArrayEquals(vals, lc.getCoefficients().getData(), 0.00001);			
-		}		
+		double[] vals = new double[8];
+		vals[1] = 1.0;
+		vals[3] = 1.0;
+		vals[6] = 1.0;
+		assertArrayEquals(vals, lc.getCoefficients().getData(), 0.00001);			
 	}
-
 }
