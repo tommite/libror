@@ -1,10 +1,3 @@
-PACKAGE=libror_0.1.tar.gz
-
-$(PACKAGE): libror/R/* libror/man/* libror/DESCRIPTION
+libror_%.tar.gz: libror/R/*.R libror/man/*.Rd libror/DESCRIPTION libror/NAMESPACE ../target/libror-%-jar-with-dependencies.jar
 	R CMD build libror
 	R CMD check libror
-
-.PHONY: install
-
-install: $(PACKAGE)
-	R CMD INSTALL libror

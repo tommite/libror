@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="warn" name="libror">
+	<target name="warn">
+		<echo>Please use Maven2!</echo>
+	</target>
+
+	<loadfile property="header" srcFile="HEADER" />
+
+	<target name="license">
+		<replaceregexp flags="s"
+			match=".*package fi.smaa.libror"
+			replace="${header}package fi.smaa.libror">
+			<fileset dir=".">
+				<include name="*/src/**/*.java" />
+			</fileset>
+		</replaceregexp>
+	</target>
+</project>

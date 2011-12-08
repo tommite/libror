@@ -1,5 +1,4 @@
-library('rJava')
-.jinit(classpath="../../../target/libror-0.1-SNAPSHOT-jar-with-dependencies.jar")
+library(rJava)
 
 smaaror.createROR <- function(perfMat, nrSamples) {
   .jnew("fi/smaa/libror/r/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))

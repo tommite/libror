@@ -1,6 +1,6 @@
-source('smaaror.R')
+library(libror)
 
-nrSamples = 10000
+nrSamples <- 10000
 p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 ror <- smaaror.createROR(p, nrSamples)
 smaaror.addPreference(ror, 1, 2)
