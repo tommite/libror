@@ -10,8 +10,8 @@
 		<replaceregexp flags="s"
 			match=".*package fi.smaa.libror"
 			replace="${header}package fi.smaa.libror">
-			<fileset dir=".">
-				<include name="*/src/**/*.java" />
+			<fileset dir="src">
+				<include name="**/*.java" />
 			</fileset>
 		</replaceregexp>
 	</target>
