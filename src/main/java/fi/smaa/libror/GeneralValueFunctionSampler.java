@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.random.MersenneTwister;
 
-public class RORValueFunctionSampler extends RORModel {
+public class GeneralValueFunctionSampler extends RORModel {
 	
 	private FullValueFunction[] vfs;
 	private MersenneTwister rng = new MersenneTwister(0x667);
@@ -39,7 +39,7 @@ public class RORValueFunctionSampler extends RORModel {
 	 * @param perfMatrix the performanceMatrix to use.
 	 * @param count the amount of functions to sample, > 0
 	 */
-	public RORValueFunctionSampler(RealMatrix perfMatrix, int count) {
+	public GeneralValueFunctionSampler(RealMatrix perfMatrix, int count) {
 		super(perfMatrix);
 		w = new double[getNrCriteria()];
 		vfs = new FullValueFunction[count];		

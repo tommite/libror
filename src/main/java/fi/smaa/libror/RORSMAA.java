@@ -26,13 +26,13 @@ public class RORSMAA {
 
 	private static final int NR_ITERS = 10000;
 	private RealMatrix perfMatrix;
-	private RORValueFunctionSampler sampler;
+	private GeneralValueFunctionSampler sampler;
 	private RealMatrix raiMatrix;
 	private RealMatrix poiMatrix;
 
 	public RORSMAA(RealMatrix perfMatrix) {
 		this.perfMatrix = perfMatrix;
-		this.sampler = new RORValueFunctionSampler(perfMatrix, NR_ITERS);
+		this.sampler = new GeneralValueFunctionSampler(perfMatrix, NR_ITERS);
 	}
 	
 	public void compute() {

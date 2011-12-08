@@ -19,36 +19,31 @@
 
 package fi.smaa.libror.r;
 
-import org.apache.commons.math.linear.RealMatrix;
-
 import fi.smaa.libror.UTAGMSSolver;
 
-public class UTAGMSSolverRFacade {
-
-	private UTAGMSSolver solver;
+public class UTAGMSSolverRFacade extends RORRFacade<UTAGMSSolver>{
 
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 */
 	public UTAGMSSolverRFacade(double[] matrix, int nRows) {
-		RealMatrix perfMatrix = RHelper.rArrayMatrixToRealMatrix(matrix, nRows);
-		solver = new UTAGMSSolver(perfMatrix);
+		super(new UTAGMSSolver(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
 	}
 
 	public void solve() {
-		solver.solve();
+		model.solve();
 	}
 	
 	public void printModel(boolean necessary, int a, int b) {
-		solver.printModel(necessary, a, b);
+		model.printModel(necessary, a, b);
 	}
 	
 	public double[][] getNecessaryRelation() {
-		return solver.getNecessaryRelation().getData();
+		return model.getNecessaryRelation().getData();
 	}
 	
 	public double[][] getPossibleRelation() {
-		return solver.getPossibleRelation().getData();
+		return model.getPossibleRelation().getData();
 	}	
 }

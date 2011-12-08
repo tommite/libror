@@ -1,5 +1,5 @@
-library('rJava')
-.jinit(classpath="../../../target/libror-0.1-SNAPSHOT-jar-with-dependencies.jar")
+library(rJava)
+include('libror_common.R')
 
 utagms.createROR <- function(perfMat) {
   .jnew("fi/smaa/libror/r/UTAGMSSolverRFacade", as.vector(perfMat), as.integer(nrow(perfMat)))

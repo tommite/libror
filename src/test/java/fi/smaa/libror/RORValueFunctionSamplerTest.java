@@ -28,11 +28,11 @@ import org.apache.commons.math.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
-import fi.smaa.libror.RORValueFunctionSampler;
+import fi.smaa.libror.GeneralValueFunctionSampler;
 
 public class RORValueFunctionSamplerTest {
 
-	private RORValueFunctionSampler sampler;
+	private GeneralValueFunctionSampler sampler;
 
 	@Before
 	public void setUp() {
@@ -42,7 +42,7 @@ public class RORValueFunctionSamplerTest {
 		p.setRow(0, new double[] {1.0, 2.0, 3.0});
 		p.setRow(1, new double[] {1.0, 3.0, 4.0});
 		p.setRow(2, new double[] {2.0, -1.0, 3.0});
-		sampler = new RORValueFunctionSampler(p, 5);
+		sampler = new GeneralValueFunctionSampler(p, 5);
 	}
 	
 	@Test

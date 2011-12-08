@@ -1,7 +1,8 @@
 library(rJava)
+include('libror_common.R')
 
 smaaror.createROR <- function(perfMat, nrSamples) {
-  .jnew("fi/smaa/libror/r/RORSamplerRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
+  .jnew("fi/smaa/libror/r/SMAARORRFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
 }
 
 smaaror.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
@@ -53,9 +54,6 @@ smaaror.getMisses <- function(ror) {
   .jcall(ror, "I", method="getMisses")
 }
 
-smaaror.addPreference <- function(ror, a, b) {
-  .jcall(ror, "V", method="addPreference", as.integer(a), as.integer(b))
-}
 
 
 
