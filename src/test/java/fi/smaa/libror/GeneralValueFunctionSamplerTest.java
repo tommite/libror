@@ -19,7 +19,9 @@
 
 package fi.smaa.libror;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.ArrayRealVector;
@@ -28,9 +30,7 @@ import org.apache.commons.math.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
-import fi.smaa.libror.GeneralValueFunctionSampler;
-
-public class RORValueFunctionSamplerTest {
+public class GeneralValueFunctionSamplerTest {
 
 	private GeneralValueFunctionSampler sampler;
 
@@ -55,7 +55,46 @@ public class RORValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testGetValueFunctions() {
+	public void testCorrectVals() {
+		sampler.sample();
+		FullValueFunction fvf = sampler.getValueFunctions()[0];
+		int i=0;
+		for (PartialValueFunction vf : fvf.getPartialValueFunctions()) {
+			assertArrayEquals(sampler.getLevels()[i].getData(), vf.getVals(), 0.0001);
+			i++;
+		}
+	}
+	
+	@Test
+	public void testMonotonousEvals() {
+		sampler.sample();
+		for (FullValueFunction fvf : sampler.getValueFunctions()) {
+			for (PartialValueFunction vf : fvf.getPartialValueFunctions()) {
+				double[] evals = vf.getEvals();
+				double prevVal = -1.0;
+				for (double eval : evals) {
+					assertTrue(prevVal <= eval);
+					prevVal = eval;
+				}
+			}
+		}
+	}
+	
+	@Test
+	public void testValueFunctionsSize() {
 		assertEquals(5, sampler.getValueFunctions().length);
+	}
+	
+	@Test
+	public void testValueFunctionMaxsSumToUnity() {
+		sampler.sample();
+		for (FullValueFunction vf : sampler.getValueFunctions()) {
+			double sum = 0.0;
+			for (PartialValueFunction v : vf.getPartialValueFunctions()) {
+				double[] ev = v.getEvals();
+				sum += ev[ev.length-1];
+			}
+			assertEquals(1.0, sum, 0.0000001);
+		}
 	}
 }

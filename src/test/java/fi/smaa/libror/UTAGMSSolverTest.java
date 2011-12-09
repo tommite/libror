@@ -113,4 +113,16 @@ public class UTAGMSSolverTest {
 		vals[6] = 1.0;
 		assertArrayEquals(vals, lc.getCoefficients().getData(), 0.00001);			
 	}
+	
+	@Test
+	public void testDominancePossibleRelation() {
+		double[][] data = new double[][]{
+				{82,94,80,91},
+				{59,73,72,67}};
+		UTAGMSSolver s = new UTAGMSSolver(new Array2DRowRealMatrix(data));
+		s.solve();
+		RealMatrix posRel = s.getPossibleRelation();
+		assertArrayEquals(new double[]{1.0, 1.0}, posRel.getRow(0), 0.001);		
+		assertArrayEquals(new double[]{0.0, 1.0}, posRel.getRow(1), 0.001);
+	}
 }

@@ -84,6 +84,9 @@ public class GeneralValueFunctionSampler extends RORModel {
 	}
 
 	public FullValueFunction[] getValueFunctions() {
+		if (vfs == null) {
+			throw new IllegalStateException("sample() not called");
+		}
 		return vfs;
 	}
 	

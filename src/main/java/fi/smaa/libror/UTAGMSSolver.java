@@ -31,8 +31,10 @@ import org.apache.commons.math.optimization.OptimizationException;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
+import org.apache.commons.math.optimization.linear.NoFeasibleSolutionException;
 import org.apache.commons.math.optimization.linear.Relationship;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
+import org.apache.commons.math.optimization.linear.UnboundedSolutionException;
 
 
 @SuppressWarnings("deprecation")
@@ -41,25 +43,39 @@ public class UTAGMSSolver extends RORModel {
 	private RealMatrix necessaryRelation = null;
 	private RealMatrix possibleRelation = null;
 	private SimplexSolver solver = new SimplexSolver();
+	
+	public enum RelationsType {
+		BOTH,
+		NECESSARY,
+		POSSIBLE
+	}
 
 	public UTAGMSSolver(RealMatrix perfMatrix) {
 		super(perfMatrix);
 	}
-
+	
 	public void solve() {
-		necessaryRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrCriteria());
-		possibleRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrCriteria());
+		solve(RelationsType.BOTH);
+	}
+
+	public void solve(RelationsType rel) {
+		necessaryRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrAlternatives());
+		possibleRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrAlternatives());
 		List<LinearConstraint> baseConstraints = buildRORConstraints();
 		for (int i=0;i<getNrAlternatives();i++) {
 			for (int j=0;j<getNrAlternatives();j++) {
-				necessaryRelation.setEntry(i, j,
-						solveRelation(i, j, baseConstraints, true)? 1.0 : 0.0);
-				possibleRelation.setEntry(i, j,
-						solveRelation(i, j, baseConstraints, false)? 1.0 : 0.0);				
+				if (rel.equals(RelationsType.NECESSARY) || rel.equals(RelationsType.BOTH)) {
+					necessaryRelation.setEntry(i, j,
+							solveRelation(i, j, baseConstraints, true)? 1.0 : 0.0);
+				}
+				if (rel.equals(RelationsType.POSSIBLE) || rel.equals(RelationsType.BOTH)) {
+					possibleRelation.setEntry(i, j,
+							solveRelation(i, j, baseConstraints, false)? 1.0 : 0.0);
+				}
 			}
 		}
 	}
-	
+		
 	public void printModel(boolean necessary, int a, int b) {
 		List<LinearConstraint> constraints = buildRORConstraints();
 		addNecOrPrefConstraint(a, b, necessary, constraints);
@@ -78,8 +94,15 @@ public class UTAGMSSolver extends RORModel {
 			c.add(buildFirstLevelZeroConstraint(i));
 		}
 		c.add(buildBestLevelsAddToUnityConstraint());
+		c.add(buildEpsilonPositiveConstraint());
 		
 		return c;
+	}
+
+	private LinearConstraint buildEpsilonPositiveConstraint() {
+		double[] lhsVars = new double[getNrLPVariables()];		
+		lhsVars[lhsVars.length-1] = 1.0;
+		return new LinearConstraint(lhsVars, Relationship.GEQ, 0.0);
 	}
 
 	private LinearConstraint buildBestLevelsAddToUnityConstraint() {
@@ -188,12 +211,21 @@ public class UTAGMSSolver extends RORModel {
 				return res.getValue() > 0.0;
 			}
 			
-		} catch (OptimizationException e) {
+		} catch (UnboundedSolutionException e) {
+			if (necessary) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (NoFeasibleSolutionException e) {
 			if (necessary) {
 				return true;
 			} else { // possible
 				return false;
 			}
+		} catch (OptimizationException e) {
+			e.printStackTrace();
+			throw new IllegalStateException("shouldn't get here");
 		}
 	}
 
@@ -211,7 +243,6 @@ public class UTAGMSSolver extends RORModel {
 		double[] rhsVars = new double[getNrLPVariables()];
 		setVarsPositive(lhsVars, a);
 		setVarsPositive(rhsVars, b);
-		// set epsilon
 		return new LinearConstraint(lhsVars, 0.0, Relationship.GEQ, rhsVars, 0.0);		
 	}
 
