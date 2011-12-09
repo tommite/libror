@@ -62,6 +62,12 @@ public class RORSMAA extends UTAGMSSolver {
 		}
 	}
 	
+	@Override
+	public void addPreference(int a, int b) {
+		super.addPreference(a, b);
+		sampler.addPreference(a, b);
+	}
+	
 	/**
 	 * PRECOND: compute() executed
 	 * @return

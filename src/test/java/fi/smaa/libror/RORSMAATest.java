@@ -45,6 +45,12 @@ public class RORSMAATest {
 		ror.solve();
 		ror.compute();
 	}
+	
+	@Test
+	public void testGetNrAltsCrits() {
+		assertEquals(4, ror.getNrCriteria());
+		assertEquals(20, ror.getNrAlternatives());
+	}
 
 	@Test
 	public void testNecessaryRelationFirstRow() {
@@ -61,20 +67,26 @@ public class RORSMAATest {
 	}
 	
 	@Test
-	public void testPOIFirstSecondRow() {
+	public void testPOIFirstRow() {
 		RealMatrix poi = ror.getPOIs();
-		assertArrayEquals(new double[]{0.7811, 1.0, 1.0, 0.9999, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, poi.getRow(0), 0.001);
+		assertArrayEquals(new double[]{1.0, 0.7811, 1.0, 1.0, 0.9999, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+				1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, poi.getRow(0), 0.02);
+	}
+	
+	@Test
+	public void testSameDimMatrices() {
+		assertEquals(ror.getPossibleRelation().getColumnDimension(), ror.getPOIs().getColumnDimension());
+		assertEquals(ror.getPossibleRelation().getRowDimension(), ror.getPOIs().getRowDimension());
 	}
 	
 	@Test
 	public void testPOIsWithPossibleRelations() {
-		RealMatrix pos = ror.getPossibleRelation();
 		RealMatrix poi = ror.getPOIs();
+		RealMatrix pos = ror.getPossibleRelation();		
 		for (int i=0;i<pos.getRowDimension();i++) {
 			for (int j=0;j<pos.getColumnDimension();j++) {
 				if (poi.getEntry(i, j) > 0.0) {
-					assertTrue("pos vs poi failed at (" + i + ","+j+")", pos.getEntry(i, j) > 0.0);
+					assertTrue("pos vs poi failed at ("+i+","+j+")", pos.getEntry(i, j) > 0.0);
 				}
 			}
 		}
