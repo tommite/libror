@@ -22,11 +22,14 @@ package fi.smaa.libror;
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
 
+import fi.smaa.common.ValueRanker;
+
 public class RORSMAA extends UTAGMSSolver {
 
 	private static final int NR_ITERS = 10000;
 	private GeneralValueFunctionSampler sampler;
 	private RealMatrix poiMatrix;
+	private RealMatrix raiMatrix;
 
 	public RORSMAA(RealMatrix perfMatrix) {
 		super(perfMatrix);
@@ -38,6 +41,8 @@ public class RORSMAA extends UTAGMSSolver {
 		int nrAlt = getNrAlternatives();		
 		double[] evals = new double[nrAlt];
 		int[][] poiHits = new int[nrAlt][nrAlt];
+		int[][] raiHits = new int[nrAlt][nrAlt];
+		int[] ranks = new int[nrAlt];
 
 		for (FullValueFunction vf : sampler.getValueFunctions()) {
 			// evaluate all alts
@@ -52,12 +57,19 @@ public class RORSMAA extends UTAGMSSolver {
 					}		
 				}
 			}
+			// update rai hits
+			ValueRanker.rankValues(evals, ranks);
+			for (int i=0;i<nrAlt;i++) {
+				raiHits[i][ranks[i]]++;
+			}
 		}
 		poiMatrix = new Array2DRowRealMatrix(nrAlt, nrAlt);
+		raiMatrix = new Array2DRowRealMatrix(nrAlt, nrAlt);
 		double divider = (double) sampler.getValueFunctions().length;
 		for (int i=0;i<nrAlt;i++) {
 			for (int j=0;j<nrAlt;j++) {
 				poiMatrix.setEntry(i, j, (double) poiHits[i][j] / (double)divider);
+				raiMatrix.setEntry(i, j, (double) raiHits[i][j] / (double)divider);
 			}
 		}
 	}
@@ -78,4 +90,15 @@ public class RORSMAA extends UTAGMSSolver {
 		}
 		return poiMatrix;
 	}
+	
+	/**
+	 * PRECOND: compute() executed
+	 * @return
+	 */
+	public RealMatrix getRAIs() {
+		if (raiMatrix == null) {
+			throw new IllegalStateException("compute() not called");
+		}
+		return raiMatrix;
+	}	
 }

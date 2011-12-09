@@ -92,4 +92,11 @@ public class RORSMAATest {
 		}
 	}
 	
+	@Test
+	public void testRAIFirstRow() {
+		RealMatrix rai = ror.getRAIs();
+		assertArrayEquals(new double[]{0.7811, 0.2188, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, rai.getRow(0), 0.02);		
+	}
+	
 }
