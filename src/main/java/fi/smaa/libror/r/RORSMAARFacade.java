@@ -24,14 +24,14 @@ import org.apache.commons.math.linear.RealMatrix;
 import fi.smaa.libror.PartialValueFunction;
 import fi.smaa.libror.GeneralValueFunctionSampler;
 
-public class SMAARORRFacade extends RORRFacade<GeneralValueFunctionSampler> {
+public class RORSMAARFacade extends RORRFacade<GeneralValueFunctionSampler> {
 	
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 * @param count the amount of functions to sample, > 0
 	 */
-	public SMAARORRFacade(double[] matrix, int nRows, int count) {
+	public RORSMAARFacade(double[] matrix, int nRows, int count) {
 		super(new GeneralValueFunctionSampler(RHelper.rArrayMatrixToRealMatrix(matrix, nRows), count));
 	}
 

@@ -1,7 +1,7 @@
 library(rJava)
 include('libror_common.R')
 
-utagms.createROR <- function(perfMat) {
+utagms.create <- function(perfMat) {
   .jnew("fi/smaa/libror/r/UTAGMSSolverRFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
 }
 
