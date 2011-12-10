@@ -1,8 +1,8 @@
 library(rJava)
 include('libror_common.R')
 
-rorsmaa.create <- function(perfMat, nrSamples) {
-  .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)), as.integer(nrSamples))
+rorsmaa.create <- function(perfMat) {
+  .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
 }
 
 rorsmaa.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
@@ -18,6 +18,7 @@ rorsmaa.getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
 }
 
 rorsmaa.singleValueFunction <- function(ror, index) {
+  index = index - 1
   nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
   v <- c()
   e <- c()
@@ -31,9 +32,7 @@ rorsmaa.singleValueFunction <- function(ror, index) {
   list(vals=v, evals=e)
 }
 
-rorsmaa.allValueFunctions <- function(ror, perfMat) {
-  nAlt <- dim(perfMat)[1]
-  nCrit <- dim(perfMat)[2]
+rorsmaa.allValueFunctions <- function(ror) {
   nVf <- .jcall(ror, "I", method="getNrValueFunctions")
   nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
   ret <- list()
@@ -41,12 +40,13 @@ rorsmaa.allValueFunctions <- function(ror, perfMat) {
   lapply(seq(1, nVf), function(x) {rorsmaa.singleValueFunction(ror, x)})
 }
 
-rorsmaa.sample <- function(ror) {
-  .jcall(ror, method="sample")
+rorsmaa.compute <- function(ror) {
+  .jcall(ror, method="compute")
 }
 
-evaluateAlternative <- function(ror, vfIndex, altIndex) {
+rorsmaa.evaluateAlternative <- function(ror, vfIndex, altIndex) {
   altIndex = altIndex -1
+  vfIndex = vfIndex-1
   .jcall(ror, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
 }
 
@@ -54,6 +54,13 @@ rorsmaa.getMisses <- function(ror) {
   .jcall(ror, "I", method="getMisses")
 }
 
+rorsmaa.getRAIs <- function(ror) {
+  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getRAIs"))  
+}
+
+rorsmaa.getPOIs <- function(ror) {
+  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getPOIs"))
+}
 
 
 

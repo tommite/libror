@@ -9,16 +9,18 @@ utagms.solve <- function(ror) {
   .jcall(ror, method="solve")  
 }
 
-utagms.printModel <- function(necessary, aind, bind) {
-  .jcall(ror, method="printModel", as.logical(necessary), as.integer(aind),
+utagms.printModel <- function(ror, necessary, aind, bind) {
+  aind = aind-1
+  bind = bind-1
+  .jcall(ror, "V", method="printModel", as.logical(necessary), as.integer(aind),
          as.integer(bind))
 }
 
 utagms.getNecessaryRelation <- function(ror) {
-  .jcall(ror, "[D", method="getNecessaryRelation")
+  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getNecessaryRelation"))
 }
 
 utagms.getPossibleRelation <- function(ror) {
-  .jcall(ror, "[D", method="getPossibleRelation")
+  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getPossibleRelation"))
 }
 

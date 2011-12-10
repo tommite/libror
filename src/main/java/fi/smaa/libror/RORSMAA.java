@@ -36,6 +36,10 @@ public class RORSMAA extends UTAGMSSolver {
 		this.sampler = new GeneralValueFunctionSampler(perfMatrix, NR_ITERS);
 	}
 	
+	public GeneralValueFunctionSampler getSampler() {
+		return sampler;
+	}
+	
 	public void compute() {
 		sampler.sample();
 		int nrAlt = getNrAlternatives();		
