@@ -21,14 +21,19 @@ package fi.smaa.libror.r;
 
 import fi.smaa.libror.UTAGMSSolver;
 
-public class UTAGMSSolverRFacade extends RORRFacade<UTAGMSSolver>{
+public class UTAGMSSolverRFacade<M extends UTAGMSSolver> extends RORRFacade<M> {
 
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 */
+	@SuppressWarnings("unchecked")
 	public UTAGMSSolverRFacade(double[] matrix, int nRows) {
-		super(new UTAGMSSolver(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
+		super((M) new UTAGMSSolver(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
+	}
+	
+	protected UTAGMSSolverRFacade(M m) {
+		super(m);
 	}
 
 	public void solve() {

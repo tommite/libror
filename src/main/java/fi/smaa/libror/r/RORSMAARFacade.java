@@ -24,7 +24,7 @@ import org.apache.commons.math.linear.RealMatrix;
 import fi.smaa.libror.PartialValueFunction;
 import fi.smaa.libror.RORSMAA;
 
-public class RORSMAARFacade extends RORRFacade<RORSMAA> {
+public class RORSMAARFacade extends UTAGMSSolverRFacade<RORSMAA> {
 	
 	/**
 	 * @param matrix matrix in row-major representation

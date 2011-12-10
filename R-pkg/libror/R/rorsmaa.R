@@ -1,6 +1,3 @@
-library(rJava)
-include('libror_common.R')
-
 rorsmaa.create <- function(perfMat) {
   .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
 }
@@ -18,7 +15,6 @@ rorsmaa.getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
 }
 
 rorsmaa.singleValueFunction <- function(ror, index) {
-  index = index - 1
   nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
   v <- c()
   e <- c()

@@ -33,7 +33,6 @@
   Multiple Criteria Decision Support. Submitted manuscript.
 }
 \keyword{robust}
-\seealso{ }
 \examples{
 library(libror)
 
@@ -41,14 +40,17 @@ library(libror)
 p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 ror <- utagms.create(p)
 ror.addPreference(ror, 1, 2)
-utagms.printModel(ror, T, 1, 2)
+
+# To print constraints of individual model solved iwhtin UTAGMS
+## utagms.printModel(ror, TRUE, 1, 2)
+
 utagms.solve(ror)
 utagms.getNecessaryRelation(ror)
 utagms.getPossibleRelation(ror)
 
 ### RORSMAA ###
 sror <- rorsmaa.create(p)
-ror.addPreference(ror, 1, 2)
+ror.addPreference(sror, 1, 2)
 rorsmaa.compute(sror)
 
 ## Rejected samples for generating 10000 vf's
