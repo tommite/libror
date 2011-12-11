@@ -34,7 +34,6 @@ import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
 import org.apache.commons.math.optimization.linear.NoFeasibleSolutionException;
 import org.apache.commons.math.optimization.linear.Relationship;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
-import org.apache.commons.math.optimization.linear.UnboundedSolutionException;
 
 
 @SuppressWarnings("deprecation")
@@ -68,9 +67,10 @@ public class UTAGMSSolver extends RORModel {
 		
 		// check that the set of constraints is feasible
 		try {
-			solver.optimize(buildObjectiveFunction(), baseConstraints, GoalType.MAXIMIZE, true);
-		} catch (UnboundedSolutionException e) {
-			// ok
+			RealPointValuePair res = solver.optimize(buildObjectiveFunction(), baseConstraints, GoalType.MAXIMIZE, true);
+			if (res.getValue() <= 0.0) {
+				throw new InfeasibleConstraintsException("Preference information leading to infeasible constraints, epsilon <= 0.0");
+			}
 		} catch (OptimizationException e) {
 			throw new InfeasibleConstraintsException("Preference information leading to infeasible constraints: " + e.getMessage());
 		}
@@ -107,15 +107,19 @@ public class UTAGMSSolver extends RORModel {
 			c.add(buildFirstLevelZeroConstraint(i));
 		}
 		c.add(buildBestLevelsAddToUnityConstraint());
-		c.add(buildEpsilonPositiveConstraint());
+		c.addAll(buildAllVariablesLessThan1Constraint());
 		
 		return c;
 	}
 
-	private LinearConstraint buildEpsilonPositiveConstraint() {
-		double[] lhsVars = new double[getNrLPVariables()];		
-		lhsVars[lhsVars.length-1] = 1.0;
-		return new LinearConstraint(lhsVars, Relationship.GEQ, 0.0);
+	private List<LinearConstraint> buildAllVariablesLessThan1Constraint() {
+		List<LinearConstraint> con = new ArrayList<LinearConstraint>();
+		for (int i=0;i<getNrLPVariables();i++) {
+			double[] lhsVars = new double[getNrLPVariables()];		
+			lhsVars[i] = 1.0;
+			con.add(new LinearConstraint(lhsVars, Relationship.LEQ, 1.0));
+		}
+		return con;
 	}
 
 	private LinearConstraint buildBestLevelsAddToUnityConstraint() {
@@ -203,13 +207,13 @@ public class UTAGMSSolver extends RORModel {
 	 * @param i index of first alternative
 	 * @param j index of the second alternative
 	 * @param rorConstraints base constraints E_{ROR}^{A^R}
-	 * @param necessary TODO
+	 * @param necessary true if the relation solved is the necessary one, false otherwise
 	 * @return
 	 */
 	private boolean solveRelation(int i, int j, List<LinearConstraint> rorConstraints, boolean necessary) {
 		assert (i >= 0 && j >= 0);
 		
-		if (i ==j) {
+		if (i==j) {
 			return true;
 		}
 		
@@ -225,12 +229,6 @@ public class UTAGMSSolver extends RORModel {
 				return res.getValue() > 0.0;
 			}
 			
-		} catch (UnboundedSolutionException e) {
-			if (necessary) {
-				return false;
-			} else {
-				return true;
-			}
 		} catch (NoFeasibleSolutionException e) {
 			if (necessary) {
 				return true;
@@ -238,8 +236,7 @@ public class UTAGMSSolver extends RORModel {
 				return false;
 			}
 		} catch (OptimizationException e) {
-			e.printStackTrace();
-			throw new IllegalStateException("shouldn't get here");
+			throw new IllegalStateException("Invalid OptimizationException: " + e.getMessage());
 		}
 	}
 
