@@ -9,7 +9,9 @@ ror.addPreference(ror, 1, 3)
 
 utagms.printModel(ror, TRUE, 1, 2)
 
-utagms.solve(ror)
+if (!utagms.solve(ror)) { # if returns false, the pref. info is infeasible
+  error("Preference information making model infeasible")
+}
 
 utagms.getNecessaryRelation(ror)
 utagms.getPossibleRelation(ror)

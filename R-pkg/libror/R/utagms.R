@@ -4,7 +4,8 @@ utagms.create <- function(perfMat) {
 }
 
 utagms.solve <- function(ror) {
-  .jcall(ror$model, method="solve")  
+  val <- .jcall(ror$model, "I", method="solve")
+  return(as.logical(val))
 }
 
 utagms.printModel <- function(ror, necessary, aind, bind) {

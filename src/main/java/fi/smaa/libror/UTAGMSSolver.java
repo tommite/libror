@@ -57,14 +57,24 @@ public class UTAGMSSolver extends RORModel {
 		solver.setMaxIterations(MAX_SIMPLEX_ITERATIONS);
 	}
 	
-	public void solve() {
+	public void solve() throws InfeasibleConstraintsException {
 		solve(RelationsType.BOTH);
 	}
 
-	public void solve(RelationsType rel) {
+	public void solve(RelationsType rel) throws InfeasibleConstraintsException {
 		necessaryRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrAlternatives());
 		possibleRelation = new Array2DRowRealMatrix(getNrAlternatives(), getNrAlternatives());
 		List<LinearConstraint> baseConstraints = buildRORConstraints();
+		
+		// check that the set of constraints is feasible
+		try {
+			solver.optimize(buildObjectiveFunction(), baseConstraints, GoalType.MAXIMIZE, true);
+		} catch (UnboundedSolutionException e) {
+			// ok
+		} catch (OptimizationException e) {
+			throw new InfeasibleConstraintsException("Preference information leading to infeasible constraints: " + e.getMessage());
+		}
+		
 		for (int i=0;i<getNrAlternatives();i++) {
 			for (int j=0;j<getNrAlternatives();j++) {
 				if (rel.equals(RelationsType.NECESSARY) || rel.equals(RelationsType.BOTH)) {
@@ -205,9 +215,7 @@ public class UTAGMSSolver extends RORModel {
 		
 		List<LinearConstraint> constraints = new ArrayList<LinearConstraint>(rorConstraints);
 		addNecOrPrefConstraint(i, j, necessary, constraints);
-		double[] coeff = new double[getNrLPVariables()];
-		coeff[coeff.length-1] = 1.0;
-		LinearObjectiveFunction goalFunction = new LinearObjectiveFunction(coeff, 0.0);
+		LinearObjectiveFunction goalFunction = buildObjectiveFunction();
 		
 		try {
 			RealPointValuePair res = solver.optimize(goalFunction, constraints, GoalType.MAXIMIZE, true);
@@ -233,6 +241,13 @@ public class UTAGMSSolver extends RORModel {
 			e.printStackTrace();
 			throw new IllegalStateException("shouldn't get here");
 		}
+	}
+
+	private LinearObjectiveFunction buildObjectiveFunction() {
+		double[] coeff = new double[getNrLPVariables()];
+		coeff[coeff.length-1] = 1.0;
+		LinearObjectiveFunction goalFunction = new LinearObjectiveFunction(coeff, 0.0);
+		return goalFunction;
 	}
 
 	private void addNecOrPrefConstraint(int i, int j, boolean necessary,

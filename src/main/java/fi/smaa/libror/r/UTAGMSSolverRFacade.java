@@ -19,6 +19,7 @@
 
 package fi.smaa.libror.r;
 
+import fi.smaa.libror.InfeasibleConstraintsException;
 import fi.smaa.libror.UTAGMSSolver;
 
 public class UTAGMSSolverRFacade<M extends UTAGMSSolver> extends RORRFacade<M> {
@@ -40,8 +41,13 @@ public class UTAGMSSolverRFacade<M extends UTAGMSSolver> extends RORRFacade<M> {
 		super(m);
 	}
 
-	public void solve() {
-		model.solve();
+	public int solve() {
+		try {
+			model.solve();
+		} catch (InfeasibleConstraintsException e) {
+			return 0;
+		}
+		return 1;
 	}
 	
 	public void printModel(boolean necessary, int a, int b) {

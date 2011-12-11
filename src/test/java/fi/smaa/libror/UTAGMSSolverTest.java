@@ -47,7 +47,7 @@ public class UTAGMSSolverTest {
 	}
 	
 	@Test
-	public void testStrictPossibleRelationResults() {
+	public void testStrictPossibleRelationResults() throws InfeasibleConstraintsException {
 		solver.setStrictValueFunctions(true);
 		solver.solve();
 		RealMatrix nrel = solver.getPossibleRelation();
@@ -57,7 +57,7 @@ public class UTAGMSSolverTest {
 	}	
 		
 	@Test
-	public void testNecessaryRelationResults() {
+	public void testNecessaryRelationResults() throws InfeasibleConstraintsException {
 		solver.solve();
 		RealMatrix nrel = solver.getNecessaryRelation();
 		assertArrayEquals(new double[]{1.0, 0.0, 0.0}, nrel.getRow(0), 0.0001); 
@@ -66,7 +66,7 @@ public class UTAGMSSolverTest {
 	}
 	
 	@Test
-	public void testPossibleRelationResults() {
+	public void testPossibleRelationResults() throws InfeasibleConstraintsException {
 		solver.solve();
 		RealMatrix nrel = solver.getPossibleRelation();
 		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(0), 0.0001); 
@@ -125,7 +125,7 @@ public class UTAGMSSolverTest {
 	}
 	
 	@Test
-	public void testDominancePossibleRelation() {
+	public void testDominancePossibleRelation() throws InfeasibleConstraintsException {
 		double[][] data = new double[][]{
 				{82,94,80,91},
 				{59,73,72,67}};
