@@ -43,6 +43,7 @@ public class UTAGMSSolver extends RORModel {
 	private RealMatrix necessaryRelation = null;
 	private RealMatrix possibleRelation = null;
 	private SimplexSolver solver = new SimplexSolver();
+	private boolean strictValueFunctions = false;
 	
 	public enum RelationsType {
 		BOTH,
@@ -127,6 +128,9 @@ public class UTAGMSSolver extends RORModel {
 			double[] rhs = new double[getNrLPVariables()];
 			lhs[getConstraintOffset(critIndex)+i] = 1.0;
 			rhs[getConstraintOffset(critIndex)+i+1] = 1.0;
+			if (strictValueFunctions) {
+				lhs[lhs.length-1] = 1.0; // epsilon
+			}
 			constList.add(new LinearConstraint(lhs, 0.0, Relationship.LEQ, rhs, 0.0));
 		}
 		return constList;
@@ -268,5 +272,9 @@ public class UTAGMSSolver extends RORModel {
 			throw new IllegalStateException("violating PRECOND");
 		}
 		return possibleRelation;
+	}
+
+	public void setStrictValueFunctions(boolean b) {
+		this.strictValueFunctions = b;
 	}
 }

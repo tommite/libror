@@ -32,6 +32,10 @@ public class UTAGMSSolverRFacade<M extends UTAGMSSolver> extends RORRFacade<M> {
 		super((M) new UTAGMSSolver(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
 	}
 	
+	public void setStrictValueFunctions(boolean strict) {
+		model.setStrictValueFunctions(strict);
+	}
+	
 	protected UTAGMSSolverRFacade(M m) {
 		super(m);
 	}

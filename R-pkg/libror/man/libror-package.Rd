@@ -9,16 +9,6 @@
   The current version assumes ascending preferences, i.e. higher
   criterion evaluation means higher preferability (=better).
 }
-\details{
-  \tabular{ll}{
-    Package: \tab libror\cr
-    Type: \tab Package\cr
-    Version: \tab 0.2\cr
-    Date: \tab 2011-12-10\cr
-    License: \tab GPL3\cr
-    LazyLoad: \tab yes\cr
-  }
-}
 \author{
   Tommi Tervonen
 
@@ -41,11 +31,15 @@ p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 ror <- utagms.create(p)
 ror.addPreference(ror, 1, 2)
 
-# To print constraints of individual model solved iwhtin UTAGMS
+## To print constraints of individual model solved within UTAGMS
 ## utagms.printModel(ror, TRUE, 1, 2)
 
 utagms.solve(ror)
 utagms.getNecessaryRelation(ror)
+utagms.getPossibleRelation(ror)
+
+## Strictly monotonous (increasing) value functions
+utagms.setStrictValueFunctions(ror, TRUE)
 utagms.getPossibleRelation(ror)
 
 ### RORSMAA ###

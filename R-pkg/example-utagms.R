@@ -13,3 +13,7 @@ utagms.solve(ror)
 
 utagms.getNecessaryRelation(ror)
 utagms.getPossibleRelation(ror)
+
+# Try strictly monotonously increasing value functions
+utagms.setStrictValueFunctions(ror, TRUE)
+utagms.getPossibleRelation(ror)

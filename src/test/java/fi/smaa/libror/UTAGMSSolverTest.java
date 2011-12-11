@@ -45,6 +45,16 @@ public class UTAGMSSolverTest {
 		solver = new UTAGMSSolver(perfMatrix);
 		solver.addPreference(2, 1); // a3 > a2
 	}
+	
+	@Test
+	public void testStrictPossibleRelationResults() {
+		solver.setStrictValueFunctions(true);
+		solver.solve();
+		RealMatrix nrel = solver.getPossibleRelation();
+		assertArrayEquals(new double[]{1.0, 0.0, 0.0}, nrel.getRow(0), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
+		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
+	}	
 		
 	@Test
 	public void testNecessaryRelationResults() {
@@ -62,8 +72,8 @@ public class UTAGMSSolverTest {
 		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(0), 0.0001); 
 		assertArrayEquals(new double[]{1.0, 1.0, 0.0}, nrel.getRow(1), 0.0001); 
 		assertArrayEquals(new double[]{1.0, 1.0, 1.0}, nrel.getRow(2), 0.0001); 
-	}	
-	
+	}
+		
 	@Test
 	public void testBuildRORConstraints() {
 		List<LinearConstraint> c = solver.buildRORConstraints();

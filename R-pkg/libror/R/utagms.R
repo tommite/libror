@@ -14,6 +14,10 @@ utagms.printModel <- function(ror, necessary, aind, bind) {
          as.integer(bind))
 }
 
+utagms.setStrictValueFunctions <- function(ror, strict) {
+  .jcall(ror$model, "V", method="setStrictValueFunctions", as.logical(strict))
+}
+
 utagms.getNecessaryRelation <- function(ror) {
   rel <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getNecessaryRelation"))
   rownames(rel) <- ror$rownames
