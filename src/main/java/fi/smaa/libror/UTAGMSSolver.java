@@ -77,13 +77,18 @@ public class UTAGMSSolver extends RORModel {
 		
 		for (int i=0;i<getNrAlternatives();i++) {
 			for (int j=0;j<getNrAlternatives();j++) {
+				boolean necHolds = false;
 				if (rel.equals(RelationsType.NECESSARY) || rel.equals(RelationsType.BOTH)) {
-					necessaryRelation.setEntry(i, j,
-							solveRelation(i, j, baseConstraints, true)? 1.0 : 0.0);
+					necHolds = solveRelation(i, j, baseConstraints, true);
+					necessaryRelation.setEntry(i, j, necHolds ? 1.0 : 0.0);
 				}
 				if (rel.equals(RelationsType.POSSIBLE) || rel.equals(RelationsType.BOTH)) {
-					possibleRelation.setEntry(i, j,
+					if (necHolds) {
+						possibleRelation.setEntry(i, j, 1.0);
+					} else {
+						possibleRelation.setEntry(i, j,
 							solveRelation(i, j, baseConstraints, false)? 1.0 : 0.0);
+					}
 				}
 			}
 		}
@@ -202,7 +207,7 @@ public class UTAGMSSolver extends RORModel {
 	}
 
 	/**
-	 * Check whether necessary relation holds.
+	 * Check whether relation holds.
 	 * 
 	 * @param i index of first alternative
 	 * @param j index of the second alternative
