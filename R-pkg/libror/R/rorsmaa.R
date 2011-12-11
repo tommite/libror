@@ -1,21 +1,22 @@
 rorsmaa.create <- function(perfMat) {
-  .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
+  model <- .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
+  list(model=model, rownames=rownames(perfMat), colnames=colnames(perfMat))
 }
 
 rorsmaa.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
   partialVfIndex = partialVfIndex - 1
   vfIndex = vfIndex - 1
-  .jcall(ror, "[D", method="getValueFunctionVals", as.integer(vfIndex), as.integer(partialVfIndex))
+  .jcall(ror$model, "[D", method="getValueFunctionVals", as.integer(vfIndex), as.integer(partialVfIndex))
 }
 
 rorsmaa.getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
   partialVfIndex = partialVfIndex - 1
   vfIndex = vfIndex - 1
-  .jcall(ror, "[D", method="getValueFunctionEvals", as.integer(vfIndex), as.integer(partialVfIndex))
+  .jcall(ror$model, "[D", method="getValueFunctionEvals", as.integer(vfIndex), as.integer(partialVfIndex))
 }
 
 rorsmaa.singleValueFunction <- function(ror, index) {
-  nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
+  nPartVf <- .jcall(ror$model, "I", method="getNrPartialValueFunctions")
   v <- c()
   e <- c()
   for (i in 1:nPartVf) {
@@ -29,33 +30,41 @@ rorsmaa.singleValueFunction <- function(ror, index) {
 }
 
 rorsmaa.allValueFunctions <- function(ror) {
-  nVf <- .jcall(ror, "I", method="getNrValueFunctions")
-  nPartVf <- .jcall(ror, "I", method="getNrPartialValueFunctions")
+  nVf <- .jcall(ror$model, "I", method="getNrValueFunctions")
+  nPartVf <- .jcall(ror$model, "I", method="getNrPartialValueFunctions")
   ret <- list()
 
   lapply(seq(1, nVf), function(x) {rorsmaa.singleValueFunction(ror, x)})
 }
 
 rorsmaa.compute <- function(ror) {
-  .jcall(ror, method="compute")
+  .jcall(ror$model, method="compute")
 }
 
 rorsmaa.evaluateAlternative <- function(ror, vfIndex, altIndex) {
   altIndex = altIndex -1
   vfIndex = vfIndex-1
-  .jcall(ror, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
+  .jcall(ror$model, "D", method="evaluateAlternative", as.integer(vfIndex), as.integer(altIndex))
 }
 
 rorsmaa.getMisses <- function(ror) {
-  .jcall(ror, "I", method="getMisses")
+  .jcall(ror$model, "I", method="getMisses")
 }
 
 rorsmaa.getRAIs <- function(ror) {
-  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getRAIs"))  
+  rai <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getRAIs"))
+  rownames(rai) <- ror$rownames
+  if (!is.null(ror$rownames)) {
+    colnames(rai) <- seq(1, length(ror$rownames))
+  }
+  return(rai)
 }
 
 rorsmaa.getPOIs <- function(ror) {
-  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getPOIs"))
+  poi <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getPOIs"))
+  rownames(poi) <- ror$rownames
+  colnames(poi) <- ror$rownames
+  return(poi)
 }
 
 

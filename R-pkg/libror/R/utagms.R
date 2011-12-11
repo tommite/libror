@@ -1,23 +1,30 @@
 utagms.create <- function(perfMat) {
-  .jnew("fi/smaa/libror/r/UTAGMSSolverRFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
+  model <- .jnew("fi/smaa/libror/r/UTAGMSSolverRFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
+  list(model=model,rownames=rownames(perfMat),colnames=colnames(perfMat))
 }
 
 utagms.solve <- function(ror) {
-  .jcall(ror, method="solve")  
+  .jcall(ror$model, method="solve")  
 }
 
 utagms.printModel <- function(ror, necessary, aind, bind) {
   aind = aind-1
   bind = bind-1
-  .jcall(ror, "V", method="printModel", as.logical(necessary), as.integer(aind),
+  .jcall(ror$model, "V", method="printModel", as.logical(necessary), as.integer(aind),
          as.integer(bind))
 }
 
 utagms.getNecessaryRelation <- function(ror) {
-  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getNecessaryRelation"))
+  rel <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getNecessaryRelation"))
+  rownames(rel) <- ror$rownames
+  colnames(rel) <- ror$rownames
+  return(rel)
 }
 
 utagms.getPossibleRelation <- function(ror) {
-  .doubleArrayToMatrix(.jcall(ror, "[[D", method="getPossibleRelation"))
+  rel <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getPossibleRelation"))
+  rownames(rel) <- ror$rownames
+  colnames(rel) <- ror$rownames
+  return(rel)
 }
 

@@ -1,6 +1,7 @@
 CURPKG=libror_0.2.tar.gz
+CURJAVAPKG=libror-0.2-jar-with-dependencies.jar
 
-libror_%.tar.gz: ../target/libror-%-jar-with-dependencies.jar libror/R/*.R libror/man/*.Rd libror/DESCRIPTION libror/NAMESPACE
+${CURPKG}: ../target/${CURJAVAPKG} libror/R/*.R libror/man/*.Rd libror/DESCRIPTION libror/NAMESPACE
 	rm -Rf libror/inst/java
 	mkdir -p libror/inst/java
 	cp $< libror/inst/java
@@ -9,7 +10,7 @@ libror_%.tar.gz: ../target/libror-%-jar-with-dependencies.jar libror/R/*.R libro
 
 all: ${CURPKG}
 
-../target/libror-%-jar-with-dependencies.jar:
+../target/${CURJAVAPKG}:
 	mvn -f ../pom.xml package
 
 clean:
@@ -17,4 +18,4 @@ clean:
 	-rm -Rf libror/inst
 
 install: all
-	R CMD INSTALL libror_0.2.tar.gz
+	R CMD INSTALL ${CURPKG}
