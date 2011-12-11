@@ -44,6 +44,7 @@ public class UTAGMSSolver extends RORModel {
 	private RealMatrix possibleRelation = null;
 	private SimplexSolver solver = new SimplexSolver();
 	private boolean strictValueFunctions = false;
+	private static final int MAX_SIMPLEX_ITERATIONS = 100000;
 	
 	public enum RelationsType {
 		BOTH,
@@ -53,6 +54,7 @@ public class UTAGMSSolver extends RORModel {
 
 	public UTAGMSSolver(RealMatrix perfMatrix) {
 		super(perfMatrix);
+		solver.setMaxIterations(MAX_SIMPLEX_ITERATIONS);
 	}
 	
 	public void solve() {
