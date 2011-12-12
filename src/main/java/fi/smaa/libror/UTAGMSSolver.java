@@ -44,6 +44,7 @@ public class UTAGMSSolver extends RORModel {
 	private SimplexSolver solver = new SimplexSolver();
 	private boolean strictValueFunctions = false;
 	private static final int MAX_SIMPLEX_ITERATIONS = 100000;
+	private static final double MIN_EPSILON = 0.00001;
 	
 	public enum RelationsType {
 		BOTH,
@@ -113,8 +114,15 @@ public class UTAGMSSolver extends RORModel {
 		}
 		c.add(buildBestLevelsAddToUnityConstraint());
 		c.addAll(buildAllVariablesLessThan1Constraint());
+		c.add(buildEpsilonStrictlyPositiveConstraint());
 		
 		return c;
+	}
+
+	private LinearConstraint buildEpsilonStrictlyPositiveConstraint() {
+		double[] lhsVars = new double[getNrLPVariables()];		
+		lhsVars[lhsVars.length-1] = 1.0;
+		return new LinearConstraint(lhsVars, Relationship.GEQ, MIN_EPSILON);		
 	}
 
 	private List<LinearConstraint> buildAllVariablesLessThan1Constraint() {
