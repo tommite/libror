@@ -66,9 +66,11 @@ buildBaseLPModel <- function(perf, preferences, strictVF=FALSE) {
   c5 <- buildEpsilonStrictlyPositiveConstraint(perf)
 
   allConst <- combineConstraints(c1, c2, c3, c4, c5)
-  
-  for (i in 1:nrow(preferences)) {
-    allConst <- combineConstraints(allConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
+
+  if (is.matrix(preferences)) {
+    for (i in 1:nrow(preferences)) {
+      allConst <- combineConstraints(allConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
+    }
   }
   return(allConst)
 }
