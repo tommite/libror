@@ -1,6 +1,6 @@
 library(Rsymphony)
 
-utagms.buildRelation <- function(perf, preferences, necessary=TRUE, strictVF=FALSE) {
+utagms <- function(perf, preferences, necessary=TRUE, strictVF=FALSE) {
   rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
 
   for (i in 1:nrow(rel)) {

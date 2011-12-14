@@ -1,10 +1,10 @@
 Package: libror
-Version: 0.3
-Date: 2011-12-10
+Version: 0.4
+Date: 2011-12-14
 Title: Robust Ordinal Regression MCDA library
 Author: Tommi Tervonen
 Maintainer: Tommi Tervonen <tommi@smaa.fi>
 Description: An R package for computing both exact- and stochastic robust ordinal regression.
-Depends: R (>= 2.7.0), rJava (>= 0.8-0)
+Depends: R (>= 2.7.0), rJava (>= 0.8-0) Rsymphony (>=0.1.12)
 SystemRequirements: Java (>= 1.5)
 License: GPL-3
