@@ -8,19 +8,30 @@ utagms.buildRelation <- function(perf, preferences, necessary=TRUE, strictVF=FAL
       rel[i,j] = checkRelation(perf, preferences, i, j, necessary, strictVF)
     }
   }
+  if (!is.null(rownames(perf))) {
+    rownames(rel) <- rownames(perf)
+    colnames(rel) <- rownames(perf)    
+  }
   return(rel)
 }
 
 checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALSE) {
+  ## check vars
+  stopifnot(is.logical(necessary))
+  stopifnot(is.logical(strictVF))
   if (a == b) {
     return(TRUE)
   }
   altVars <- buildAltVariableMatrix(perf)  
   baseModel <- buildBaseLPModel(perf, preferences, strictVF)
-  allConst <- c()
+
+  addConst <- c()
   if (necessary == TRUE) {
-    allConst <- combineConstraints(baseModel, buildStrictPreferenceConstraint(b, a, altVars))
+    addConst <- buildStrongPreferenceConstraint(b, a, altVars)
+  } else { ## possible
+    allConst <- buildWeakPreferenceConstraint(a, b, altVars)
   }
+  allConst <- combineConstraints(baseModel, addConst)
   obj <- buildObjectiveFunction(perf)
   ret <- Rsymphony_solve_LP(obj, allConst$lhs, allConst$dir, allConst$rhs, max=TRUE)
 
@@ -57,17 +68,27 @@ buildBaseLPModel <- function(perf, preferences, strictVF=FALSE) {
   prefConst <- c()
   
   for (i in 1:nrow(preferences)) {
-    prefConst <- append(prefConst, buildStrictPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
+    prefConst <- append(prefConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
   }
   return(combineConstraints(c1, c2, c3, c4, c5, prefConst))
 }
 
-buildStrictPreferenceConstraint <- function(a, b, altVars) {
+buildStrongPreferenceConstraint <- function(a, b, altVars) {
   levels <- getLevels(perf)
   nrVars <- getNrVars(levels)
 
   lhs <- altVars[a,]
   lhs[length(lhs)] = -1
+  lhs <- lhs - altVars[b,]
+
+  return(list(lhs=lhs, dir=">=", rhs=0))
+}
+
+buildWeakPreferenceConstraint <- function(a, b, altVars) {
+  levels <- getLevels(perf)
+  nrVars <- getNrVars(levels)
+
+  lhs <- altVars[a,]
   lhs <- lhs - altVars[b,]
 
   return(list(lhs=lhs, dir=">=", rhs=0))
@@ -104,7 +125,7 @@ buildAllVariablesLessThan1Constraint <- function(perf) {
 
   lhs <- diag(nrVars)
 
-  return(list(lhs=lhs, dir="<=", rhs=rep(1, nrVars)))
+  return(list(lhs=lhs, dir=rep("<=", nrVars), rhs=rep(1, nrVars)))
 }
 
 buildBestLevelsAddToUnityConstraint <- function(perf) {
@@ -155,8 +176,6 @@ buildMonotonousConstraints <- function(perf, strictly=FALSE) {
   return(list(lhs=res, dir=rep("<=", nrow(res)), rhs=rep(0, nrow(res))))
 }
 
-
-
 getLevels <- function(perf) {
   return(apply(perf, 2, function(x) {sort(unique(x))} ))
 }
@@ -164,7 +183,6 @@ getLevels <- function(perf) {
 getNrVars <- function(levels) {
   return(sum(as.numeric(lapply(levels, length))) + 1)
 }
-
 
 buildAltVariableMatrix <- function(perf) {
   levels <- getLevels(perf)
