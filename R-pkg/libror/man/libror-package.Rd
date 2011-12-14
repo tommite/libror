@@ -26,50 +26,17 @@
 \examples{
 library(libror)
 
-### UTAGMS ###
-p <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
-ror <- utagms.create(p)
-ror.addPreference(ror, 1, 2)
+performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
+preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)
 
-## To print constraints of individual model solved within UTAGMS
-## utagms.printModel(ror, TRUE, 1, 2)
+## Necessary relation
+utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
+## Possible relation
+utagms(performances, preferences, necessary=FALSE, strictVF=TRUE)
 
-if (!utagms.solve(ror)) { # if returns false, the pref. info is infeasible
-  error("Preference information making model infeasible")
-}
-utagms.getNecessaryRelation(ror)
-utagms.getPossibleRelation(ror)
-
-## Strictly monotonous (increasing) value functions
-utagms.setStrictValueFunctions(ror, TRUE)
-utagms.getPossibleRelation(ror)
-
-### RORSMAA ###
-sror <- rorsmaa.create(p)
-ror.addPreference(sror, 1, 2)
-rorsmaa.compute(sror)
-
-## Rejected samples for generating 10000 vf's
-rorsmaa.getMisses(sror)
-
-## Main results
-rorsmaa.getRAIs(sror)
-rorsmaa.getPOIs(sror)
-
-## First value function, first partial value function
-rorsmaa.getValueFunctionVals(sror, 1, 1)
-rorsmaa.getValueFunctionEvals(sror, 1, 1)
-
-## First value function, all partial value functions
-rorsmaa.singleValueFunction(sror, 1)
-
-allVf <- rorsmaa.allValueFunctions(sror) # this is quite slow, uses R code
-
-## Evaluate second alternative with the first value function
-rorsmaa.evaluateAlternative(sror, 1, 2)
-
-## is also an utagms-model, so the same functions can be used here
-utagms.solve(sror)
-utagms.getNecessaryRelation(sror)
-
+## RORSMAA giving the POIs and RAIs
+ror <- rorsmaa(performances, preferences)
+print(ror$poi)
+print(ror$rai)
+cat(ror$misses, "misses while generating 10k value functions")
 }

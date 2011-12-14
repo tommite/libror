@@ -1,4 +1,4 @@
-CURPKG=libror_0.3.tar.gz
+CURPKG=libror_0.4.tar.gz
 CURJAVAPKG=libror-0.3-jar-with-dependencies.jar
 
 ${CURPKG}: ../target/${CURJAVAPKG} libror/R/*.R libror/man/*.Rd libror/DESCRIPTION libror/NAMESPACE

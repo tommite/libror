@@ -1,3 +1,19 @@
+rorsmaa <- function(perf, preferences, necessary=TRUE) {
+  rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
+
+  ror <- rorsmaa.create(perf)
+  for (i in 1:nrow(preferences)) {
+    ror.addPreference(ror, preferences[i,1], preferences[i,2])
+  }
+  rorsmaa.compute(ror)
+
+  poi <- rorsmaa.getPOIs(ror)
+  rai <- rorsmaa.getRAIs(ror)
+  misses <- rorsmaa.getMisses(ror)
+  
+  return(list(poi=poi, rai=rai, misses=misses))
+}
+
 rorsmaa.create <- function(perfMat) {
   model <- .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
   list(model=model, rownames=rownames(perfMat), colnames=colnames(perfMat))

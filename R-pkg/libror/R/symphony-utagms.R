@@ -1,11 +1,11 @@
 library(Rsymphony)
 
 utagms <- function(perf, preferences, necessary=TRUE, strictVF=FALSE) {
-  rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
+  rel <- matrix(nrow=nrow(perf), ncol=nrow(perf))
 
   for (i in 1:nrow(rel)) {
-    for(j in 1:ncol(rel)) {
-      rel[i,j] = checkRelation(perf, preferences, i, j, necessary, strictVF)
+    for(j in 1:nrow(rel)) {
+      rel[i,j] = checkRelation(perf, preferences, i, j, necessary=necessary, strictVF=strictVF)
     }
   }
   if (!is.null(rownames(perf))) {
@@ -23,7 +23,7 @@ checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALS
     return(TRUE)
   }
   altVars <- buildAltVariableMatrix(perf)  
-  baseModel <- buildBaseLPModel(perf, preferences, strictVF)
+  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF)
 
   addConst <- c()
   if (necessary == TRUE) {
@@ -59,23 +59,22 @@ buildObjectiveFunction <- function(perf) {
 buildBaseLPModel <- function(perf, preferences, strictVF=FALSE) {
   altVars <- buildAltVariableMatrix(perf)
 
-  c1 <- buildMonotonousConstraints(perf, strictVF)
+  c1 <- buildMonotonousConstraints(perf, strictVF=strictVF)
   c2 <- buildFirstLevelZeroConstraints(perf)
   c3 <- buildBestLevelsAddToUnityConstraint(perf)
   c4 <- buildAllVariablesLessThan1Constraint(perf)
   c5 <- buildEpsilonStrictlyPositiveConstraint(perf)
 
-  prefConst <- c()
+  allConst <- combineConstraints(c1, c2, c3, c4, c5)
   
   for (i in 1:nrow(preferences)) {
-    prefConst <- append(prefConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
+    allConst <- combineConstraints(allConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
   }
-  return(combineConstraints(c1, c2, c3, c4, c5, prefConst))
+  return(allConst)
 }
 
 buildStrongPreferenceConstraint <- function(a, b, altVars) {
-  levels <- getLevels(perf)
-  nrVars <- getNrVars(levels)
+  nrVars <- dim(altVars)[2]
 
   lhs <- altVars[a,]
   lhs[length(lhs)] = -1
@@ -85,9 +84,6 @@ buildStrongPreferenceConstraint <- function(a, b, altVars) {
 }
 
 buildWeakPreferenceConstraint <- function(a, b, altVars) {
-  levels <- getLevels(perf)
-  nrVars <- getNrVars(levels)
-
   lhs <- altVars[a,]
   lhs <- lhs - altVars[b,]
 
@@ -144,7 +140,7 @@ buildFirstLevelZeroConstraints <- function(perf) {
   offsets <- getOffsets(levels)
   nrVars <- getNrVars(levels)
   
-  res <- matrix(0, nrow=nrow(perf),ncol=nrVars)
+  res <- matrix(0, nrow=length(offsets),ncol=nrVars)
 
   for (i in seq(1:length(offsets))) {
     res[i,offsets[i]] = 1
@@ -153,7 +149,9 @@ buildFirstLevelZeroConstraints <- function(perf) {
   return(list(lhs=res,dir=rep("==", length(offsets)),rhs=rep(0,length(offsets))))
 }
 
-buildMonotonousConstraints <- function(perf, strictly=FALSE) {
+buildMonotonousConstraints <- function(perf, strictVF=FALSE) {
+  stopifnot(is.logical(strictVF))
+  
   levels <- getLevels(perf)
   offsets <- getOffsets(levels)
   nrVars <- getNrVars(levels)
@@ -166,7 +164,7 @@ buildMonotonousConstraints <- function(perf, strictly=FALSE) {
       lhs <- array(0, dim=nrVars)
       lhs[index] <- 1
       lhs[index+1] <- -1
-      if (strictly == TRUE) {
+      if (strictVF == TRUE) {
         lhs[length(lhs)] = 1
       }
       res <- rbind(res, lhs)
@@ -177,7 +175,11 @@ buildMonotonousConstraints <- function(perf, strictly=FALSE) {
 }
 
 getLevels <- function(perf) {
-  return(apply(perf, 2, function(x) {sort(unique(x))} ))
+  res <- list()
+  for (i in 1:ncol(perf)) {
+    res[[i]] <- sort(unique(perf[,i]))
+  }
+  return(res)
 }
 
 getNrVars <- function(levels) {
