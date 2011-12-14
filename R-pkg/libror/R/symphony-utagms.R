@@ -1,11 +1,25 @@
 library(Rsymphony)
 
+utagms.buildRelation <- function(perf, preferences, necessary=TRUE, strictVF=FALSE) {
+  rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
+
+  for (i in 1:nrow(rel)) {
+    for(j in 1:ncol(rel)) {
+      rel[i,j] = checkRelation(perf, preferences, i, j, necessary, strictVF)
+    }
+  }
+  return(rel)
+}
+
 checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALSE) {
+  if (a == b) {
+    return(TRUE)
+  }
   altVars <- buildAltVariableMatrix(perf)  
   baseModel <- buildBaseLPModel(perf, preferences, strictVF)
   allConst <- c()
   if (necessary == TRUE) {
-#    allConst <- combineConstraints(baseModel, buildStrictPreferenceConstraint(b, a, altVars))
+    allConst <- combineConstraints(baseModel, buildStrictPreferenceConstraint(b, a, altVars))
   }
   obj <- buildObjectiveFunction(perf)
   ret <- Rsymphony_solve_LP(obj, allConst$lhs, allConst$dir, allConst$rhs, max=TRUE)
