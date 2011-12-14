@@ -2,8 +2,10 @@ rorsmaa <- function(perf, preferences, necessary=TRUE) {
   rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
 
   ror <- rorsmaa.create(perf)
-  for (i in 1:nrow(preferences)) {
-    ror.addPreference(ror, preferences[i,1], preferences[i,2])
+  if (is.matrix(preferences)) {
+    for (i in 1:nrow(preferences)) {
+      ror.addPreference(ror, preferences[i,1], preferences[i,2])
+    }
   }
   rorsmaa.compute(ror)
 
