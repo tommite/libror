@@ -1,12 +1,12 @@
-CURPKG=libror_0.4.tar.gz
+CURPKG=ror_0.4.tar.gz
 CURJAVAPKG=libror-0.3-jar-with-dependencies.jar
 
-${CURPKG}: ../target/${CURJAVAPKG} libror/R/*.R libror/man/*.Rd libror/DESCRIPTION libror/NAMESPACE
-	rm -Rf libror/inst/java
-	mkdir -p libror/inst/java
-	cp $< libror/inst/java
-	R CMD build libror
-	R CMD check libror
+${CURPKG}: ../target/${CURJAVAPKG} ror/R/*.R ror/man/*.Rd ror/DESCRIPTION ror/NAMESPACE
+	rm -Rf ror/inst/java
+	mkdir -p ror/inst/java
+	cp $< ror/inst/java
+	R CMD build ror
+	R CMD check ror
 
 all: ${CURPKG}
 
@@ -15,7 +15,7 @@ all: ${CURPKG}
 
 clean:
 	-rm ${CURPKG}
-	-rm -Rf libror/inst
+	-rm -Rf ror/inst
 
 install: all
 	R CMD INSTALL ${CURPKG}

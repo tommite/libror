@@ -1,6 +1,6 @@
-\name{libror-package}
-\alias{libror-package}
-\alias{libror}
+\name{ror-package}
+\alias{ror-package}
+\alias{ror}
 \docType{package}
 \title{Robust Ordinal Regression MCDA sampler/solver}
 \description{
@@ -25,7 +25,7 @@
 \keyword{robust}
 \seealso{rorsmaa,utagms}
 \examples{
-library(libror)
+library(ror)
 
 performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)

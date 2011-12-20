@@ -1,6 +1,6 @@
-Package: libror
+Package: ror
 Version: 0.4
-Date: 2011-12-14
+Date: 2011-12-20
 Title: Robust Ordinal Regression MCDA library
 Author: Tommi Tervonen
 Maintainer: Tommi Tervonen <tommi@smaa.fi>
