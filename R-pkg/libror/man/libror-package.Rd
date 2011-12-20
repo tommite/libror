@@ -23,6 +23,7 @@
   Multiple Criteria Decision Support. Submitted manuscript.
 }
 \keyword{robust}
+\seealso{rorsmaa,utagms}
 \examples{
 library(libror)
 

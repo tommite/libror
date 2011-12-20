@@ -1,7 +1,7 @@
-rorsmaa <- function(perf, preferences, necessary=TRUE) {
-  rel <- matrix(nrow=nrow(perf), ncol=ncol(perf))
+rorsmaa <- function(performances, preferences, necessary=TRUE) {
+  rel <- matrix(nrow=nrow(performances), ncol=ncol(performances))
 
-  ror <- rorsmaa.create(perf)
+  ror <- rorsmaa.create(performances)
   if (is.matrix(preferences)) {
     for (i in 1:nrow(preferences)) {
       ror.addPreference(ror, preferences[i,1], preferences[i,2])

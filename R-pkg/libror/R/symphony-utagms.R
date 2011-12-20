@@ -1,16 +1,16 @@
 library(Rsymphony)
 
-utagms <- function(perf, preferences, necessary=TRUE, strictVF=FALSE) {
-  rel <- matrix(nrow=nrow(perf), ncol=nrow(perf))
+utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE) {
+  rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
 
   for (i in 1:nrow(rel)) {
     for(j in 1:nrow(rel)) {
-      rel[i,j] = checkRelation(perf, preferences, i, j, necessary=necessary, strictVF=strictVF)
+      rel[i,j] = checkRelation(performances, preferences, i, j, necessary=necessary, strictVF=strictVF)
     }
   }
-  if (!is.null(rownames(perf))) {
-    rownames(rel) <- rownames(perf)
-    colnames(rel) <- rownames(perf)    
+  if (!is.null(rownames(performances))) {
+    rownames(rel) <- rownames(performances)
+    colnames(rel) <- rownames(performances)    
   }
   return(rel)
 }
