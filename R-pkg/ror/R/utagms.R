@@ -1,5 +1,3 @@
-library(Rsymphony)
-
 utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE) {
   rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
 
@@ -32,13 +30,15 @@ checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALS
     allConst <- buildWeakPreferenceConstraint(a, b, altVars)
   }
   allConst <- combineConstraints(baseModel, addConst)
-  obj <- buildObjectiveFunction(perf)
-  ret <- Rsymphony_solve_LP(obj, allConst$lhs, allConst$dir, allConst$rhs, max=TRUE)
+  obj <- L_objective(buildObjectiveFunction(perf))
+  roiConst <- L_constraint(allConst$lhs, allConst$dir, allConst$rhs)
+  lp <- OP(objective=obj, constraints=roiConst, maximum=TRUE)
+  ret <- ROI_solve(lp, .solver)
 
   if (necessary == TRUE) {
-    return(ret$status != 0 || ret$objval <= 0)
+    return(ret$status$code != 0 || ret$objval <= 0)
   } else { # possible
-    return(ret$status == 0 && ret$objval > 0)
+    return(ret$status$code == 0 && ret$objval > 0)
   }
 }
 

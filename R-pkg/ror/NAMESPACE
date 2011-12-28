@@ -1,4 +1,4 @@
 import("rJava")
-import("Rsymphony")
+import("ROI")
 export("rorsmaa")
 export("utagms")
