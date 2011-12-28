@@ -8,7 +8,7 @@ utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE) {
   }
   if (!is.null(rownames(performances))) {
     rownames(rel) <- rownames(performances)
-    colnames(rel) <- rownames(performances)    
+    colnames(rel) <- rownames(performances)
   }
   return(rel)
 }
@@ -27,7 +27,7 @@ checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALS
   if (necessary == TRUE) {
     addConst <- buildStrongPreferenceConstraint(b, a, altVars)
   } else { ## possible
-    allConst <- buildWeakPreferenceConstraint(a, b, altVars)
+    addConst <- buildWeakPreferenceConstraint(a, b, altVars)
   }
   allConst <- combineConstraints(baseModel, addConst)
   obj <- L_objective(buildObjectiveFunction(perf))
@@ -152,6 +152,7 @@ buildFirstLevelZeroConstraints <- function(perf) {
 }
 
 buildMonotonousConstraints <- function(perf, strictVF=FALSE) {
+  
   stopifnot(is.logical(strictVF))
   
   levels <- getLevels(perf)
@@ -201,7 +202,7 @@ buildAltVariableMatrix <- function(perf) {
   
   for (i in seq(1:nrAlts)) {
     vec <- array(0, dim=nrVars)
-    indices <- sapply(seq(1:nrCrit), function(x) {which(levels[[x]] == perf[i,x])} )
+    indices <- sapply(seq(1:nrCrit), function(x) {which(levels[[x]] == perf[i,x])})
     vec[indices + offsets - 1] = 1
     resMat[i,] = vec
   }

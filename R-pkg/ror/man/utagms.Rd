@@ -26,11 +26,26 @@ monotonously increasing (FALSE) value functions.}
 \examples{
 library(ror)
 
-performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
-preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)
+## Example with 3 alternatives and 3 criteria
+performances <- matrix(c(1.0, 1.0, 1.0, 2.0, 1.0, 1.1, 2.0, 0.5, 3.0), ncol=3, byrow=TRUE)
+## a3 > a2
+preferences <- matrix(c(3, 2), ncol=2, byrow=TRUE)
 
 ## Necessary relation
-utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
+necrel <- utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
 ## Possible relation
-utagms(performances, preferences, necessary=FALSE, strictVF=TRUE)
+posrel <- utagms(performances, preferences, necessary=FALSE, strictVF=FALSE)
+
+## Sanity check, the necessary relation should be
+## T F F
+## T T F
+## T T T
+stopifnot(necrel == matrix(c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE,
+TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
+
+## Sanity check, the possible relation should be
+## T T F
+## T T F
+## T T T
+stopifnot(posrel == matrix(c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
 }

@@ -24,4 +24,4 @@ nec2 <- utagms(perf2, pref2, necessary=TRUE, strictVF=FALSE)
 ## T F F
 ## T T F
 ## T T T
-stopifnot(nec2 == matrix(c(T, F, F, T, T, F, T, T, T), ncol=3, byrow=TRUE))
+stopifnot(nec2 == matrix(c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
