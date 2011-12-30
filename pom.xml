@@ -4,7 +4,7 @@
   <groupId>fi.smaa</groupId>
   <artifactId>libror</artifactId>
   <name>libror</name>
-  <version>0.4</version>
+  <version>0.4.1</version>
 
   <repositories>
     <repository>
@@ -64,8 +64,8 @@
       <plugin>
 	<artifactId>maven-compiler-plugin</artifactId>
 	<configuration>
-	  <source>1.6</source>
-	  <target>1.6</target>
+	  <source>1.5</source>
+	  <target>1.5</target>
 	</configuration>
       </plugin>
       <plugin>

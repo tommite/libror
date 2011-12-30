@@ -1,5 +1,5 @@
-CURPKG=ror_0.6.tar.gz
-CURJAVAPKG=libror-0.4-jar-with-dependencies.jar
+CURPKG=ror_0.6.1.tar.gz
+CURJAVAPKG=libror-0.4.1-jar-with-dependencies.jar
 
 ${CURPKG}: ../target/${CURJAVAPKG} ror/R/*.R ror/man/*.Rd ror/DESCRIPTION ror/NAMESPACE
 	rm -Rf ror/inst/java
