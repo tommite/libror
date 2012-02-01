@@ -35,9 +35,9 @@ public class PartialValueFunction {
 	 * @param evals corresponding values v(val)
 	 */
 	public PartialValueFunction(double[] vals, double[] evals) {
-		assert(evals.length == vals.length);
-		assert(evals.length >= 2);
-		assert(evals[0] == 0.0);
+		if (evals.length != vals.length || evals.length < 2 || evals[0] != 0.0) {
+			throw new IllegalArgumentException("PRECOND violation");
+		}
 		
 		this.evals = evals;
 		this.vals = vals;
@@ -49,8 +49,9 @@ public class PartialValueFunction {
 	 * @return evaluation
 	 */
 	public double evaluate(double point) {
-		assert(point >= vals[0]);
-		assert(point <= vals[vals.length-1]);
+		if (point < vals[0] || point > vals[vals.length-1]) {
+			throw new IllegalArgumentException("PRECOND violation");
+		}
 
 		int geqIndex = 0;
 		

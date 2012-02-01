@@ -43,7 +43,9 @@ public class RandomUtil {
 	 * @throws NullPointerException if dest == null
 	 */
 	public static void createSumToRand(double[] dest, double sumTo) throws NullPointerException {
-		assert(sumTo >= 0.0);
+		if (sumTo < 0.0) {
+			throw new IllegalArgumentException("sumTo negative");
+		}
 		if (dest == null) {
 			throw new NullPointerException("destination array null");
 		}

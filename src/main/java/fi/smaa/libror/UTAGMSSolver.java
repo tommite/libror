@@ -197,7 +197,9 @@ public class UTAGMSSolver extends RORModel {
 	}
 	
 	private int getConstraintIndex(int critIndex, int altIndex) {
-		assert(critIndex >= 0 && altIndex >= 0);
+		if (critIndex < 0 || altIndex < 0) {
+			throw new IllegalArgumentException("PRECOND violation");
+		}
 		
 		int offset = getConstraintOffset(critIndex);
 		int index = Arrays.binarySearch(getPerfMatrix().getLevels()[critIndex].getData(), perfMatrix.getMatrix().getEntry(altIndex, critIndex));
@@ -217,14 +219,16 @@ public class UTAGMSSolver extends RORModel {
 	/**
 	 * Check whether relation holds.
 	 * 
-	 * @param i index of first alternative
-	 * @param j index of the second alternative
+	 * @param i index of first alternative, PRECOND: >= 0
+	 * @param j index of the second alternative, PRECOND: >= 0
 	 * @param rorConstraints base constraints E_{ROR}^{A^R}
 	 * @param necessary true if the relation solved is the necessary one, false otherwise
 	 * @return
 	 */
 	private boolean solveRelation(int i, int j, List<LinearConstraint> rorConstraints, boolean necessary) {
-		assert (i >= 0 && j >= 0);
+		if (i < 0 && j < 0) {
+			throw new IllegalArgumentException("PRECOND violation");
+		}
 		
 		if (i==j) {
 			return true;
