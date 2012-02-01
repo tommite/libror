@@ -23,13 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math.linear.RealMatrix;
-import org.apache.commons.math.random.MersenneTwister;
+import fi.smaa.libror.RORModel.PrefPair;
 
-public class GeneralValueFunctionSampler extends RORModel {
-	
-	private FullValueFunction[] vfs;
-	private MersenneTwister rng = new MersenneTwister(0x667);
+public class GeneralValueFunctionSampler extends ValueFunctionSampler {
+
 	private double[] w;
 	private int misses;
 	
@@ -39,16 +36,15 @@ public class GeneralValueFunctionSampler extends RORModel {
 	 * @param perfMatrix the performanceMatrix to use.
 	 * @param count the amount of functions to sample, > 0
 	 */
-	public GeneralValueFunctionSampler(RealMatrix perfMatrix, int count) {
-		super(perfMatrix);
-		w = new double[getNrCriteria()];
-		vfs = new FullValueFunction[count];		
+	public GeneralValueFunctionSampler(RORModel model, int count) {
+		super(model, count);
+		w = new double[model.getNrCriteria()];
 	}
 		
-	/**
-	 * Samples partial value functions.
-	 * 
-	 */
+	public int getMisses() {
+		return misses;
+	}
+	
 	public void sample() {		
 		misses = 0;
 		for (int i=0;i<vfs.length;i++) {
@@ -63,18 +59,15 @@ public class GeneralValueFunctionSampler extends RORModel {
 			}
 		}
 	}
+
 	
-	public int getMisses() {
-		return misses;
-	}
-	
-	private boolean isHit(FullValueFunction vf) {
-		double[] values = new double[getNrAlternatives()];	
+	boolean isHit(FullValueFunction vf) {
+		double[] values = new double[model.getNrAlternatives()];	
 		for (int i=0;i<values.length;i++) {
-			values[i] = vf.evaluate(perfMatrix.getRow(i));
+			values[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
 		}
 		
-		for (PrefPair p : prefPairs) {
+		for (PrefPair p : model.getPrefPairs()) {
 			if (values[p.a]< values[p.b]) {
 				return false;
 			}
@@ -83,21 +76,14 @@ public class GeneralValueFunctionSampler extends RORModel {
 		return true;
 	}
 
-	public FullValueFunction[] getValueFunctions() {
-		if (vfs == null) {
-			throw new IllegalStateException("sample() not called");
-		}
-		return vfs;
-	}
-	
 	private FullValueFunction  sampleValueFunction() {
 		FullValueFunction vf = new FullValueFunction();
 		
 		List<double[]> partVals = new ArrayList<double[]>();		
 		List<double[]> partEvals = new ArrayList<double[]>();
 		
-		for (int i=0;i<getNrCriteria();i++) {
-			double[] vals = levels[i].getData();
+		for (int i=0;i<model.getNrCriteria();i++) {
+			double[] vals = model.getPerfMatrix().getLevels()[i].getData();
 			partVals.add(vals);
 			partEvals.add(createPartialValues(vals.length));	
 		}
@@ -106,7 +92,7 @@ public class GeneralValueFunctionSampler extends RORModel {
 		RandomUtil.createSumToOneRand(w);
 		
 		// scale the partial value functions with weights
-		for (int i=0;i<getNrCriteria();i++) {
+		for (int i=0;i<model.getNrCriteria();i++) {
 			double[] evals = partEvals.get(i);
 			for (int j=0;j<evals.length;j++) {
 				evals[j] *= w[i];

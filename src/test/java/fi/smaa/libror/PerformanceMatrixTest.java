@@ -27,9 +27,9 @@ import org.apache.commons.math.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RORModelTest {
+public class PerformanceMatrixTest {
 
-	private RORModel ror;
+	private PerformanceMatrix matrix;
 
 	@Before
 	public void setUp() {
@@ -55,12 +55,12 @@ public class RORModelTest {
 				{39,26,36,37},
 				{37,21,8,37}};
 		
-		ror = new RORModel(new Array2DRowRealMatrix(data)) {};
+		matrix = new PerformanceMatrix(new Array2DRowRealMatrix(data));
 	}
 	
 	@Test
 	public void testGetLevels() {
-		RealVector[] lvls = ror.getLevels();
+		RealVector[] lvls = matrix.getLevels();
 		assertEquals(new ArrayRealVector(new double[]{37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 44.0, 45.0, 47.0, 50.0,
 				51.0, 59.0, 74.0, 82.0}), lvls[0]);
 		assertEquals(new ArrayRealVector(new double[]{21.0, 26.0, 28.0, 34.0, 36.0, 37.0, 40.0, 41.0, 43.0, 50.0, 

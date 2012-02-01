@@ -19,14 +19,11 @@
 
 package fi.smaa.libror;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
-import org.apache.commons.math.linear.ArrayRealVector;
 import org.apache.commons.math.linear.RealMatrix;
-import org.apache.commons.math.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,27 +39,7 @@ public class GeneralValueFunctionSamplerTest {
 		p.setRow(0, new double[] {1.0, 2.0, 3.0});
 		p.setRow(1, new double[] {1.0, 3.0, 4.0});
 		p.setRow(2, new double[] {2.0, -1.0, 3.0});
-		sampler = new GeneralValueFunctionSampler(p, 5);
-	}
-	
-	@Test
-	public void testGetLevels() {
-		RealVector[] lvls = sampler.getLevels();
-		assertEquals(new ArrayRealVector(new double[]{1.0, 2.0}), lvls[0]);
-		assertEquals(new ArrayRealVector(new double[]{-1.0, 2.0, 3.0}), lvls[1]);
-		assertEquals(new ArrayRealVector(new double[]{3.0, 4.0}), lvls[2]);
-		assertEquals(3, lvls.length);
-	}
-	
-	@Test
-	public void testCorrectVals() {
-		sampler.sample();
-		FullValueFunction fvf = sampler.getValueFunctions()[0];
-		int i=0;
-		for (PartialValueFunction vf : fvf.getPartialValueFunctions()) {
-			assertArrayEquals(sampler.getLevels()[i].getData(), vf.getVals(), 0.0001);
-			i++;
-		}
+		sampler = new GeneralValueFunctionSampler(new RORModel(new PerformanceMatrix(p)), 5);
 	}
 	
 	@Test

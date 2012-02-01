@@ -52,7 +52,7 @@ public class UTAGMSSolver extends RORModel {
 		POSSIBLE
 	}
 
-	public UTAGMSSolver(RealMatrix perfMatrix) {
+	public UTAGMSSolver(PerformanceMatrix perfMatrix) {
 		super(perfMatrix);
 		solver.setMaxIterations(MAX_SIMPLEX_ITERATIONS);
 	}
@@ -138,7 +138,7 @@ public class UTAGMSSolver extends RORModel {
 	private LinearConstraint buildBestLevelsAddToUnityConstraint() {
 		double[] vars = new double[getNrLPVariables()];		
 		for (int i=0;i<getNrCriteria();i++) {
-			vars[getConstraintOffset(i) + getLevels()[i].getDimension() - 1] = 1.0;
+			vars[getConstraintOffset(i) + getPerfMatrix().getLevels()[i].getDimension() - 1] = 1.0;
 		}
 		return new LinearConstraint(vars, Relationship.EQ, 1.0);		
 	}
@@ -151,7 +151,7 @@ public class UTAGMSSolver extends RORModel {
 
 	private List<LinearConstraint> buildMonotonousConstraints(int critIndex) {
 		List<LinearConstraint> constList = new ArrayList<LinearConstraint>();
-		RealVector levels = getLevels()[critIndex];
+		RealVector levels = getPerfMatrix().getLevels()[critIndex];
 		for (int i=0;i<levels.getDimension()-1;i++) {
 			double[] lhs = new double[getNrLPVariables()];
 			double[] rhs = new double[getNrLPVariables()];
@@ -190,7 +190,7 @@ public class UTAGMSSolver extends RORModel {
 	private int getNrLPVariables() {
 		// utility of all alts + epsilon
 		int sum = 0;
-		for(RealVector vec : getLevels()) {
+		for(RealVector vec : getPerfMatrix().getLevels()) {
 			sum += vec.getDimension();
 		}
 		return sum + 1;
@@ -200,7 +200,7 @@ public class UTAGMSSolver extends RORModel {
 		assert(critIndex >= 0 && altIndex >= 0);
 		
 		int offset = getConstraintOffset(critIndex);
-		int index = Arrays.binarySearch(getLevels()[critIndex].getData(), perfMatrix.getEntry(altIndex, critIndex));
+		int index = Arrays.binarySearch(getPerfMatrix().getLevels()[critIndex].getData(), perfMatrix.getMatrix().getEntry(altIndex, critIndex));
 		assert(index >= 0); // sanity check
 		
 		return offset + index;
@@ -209,7 +209,7 @@ public class UTAGMSSolver extends RORModel {
 	private int getConstraintOffset(int critIndex) {
 		int offset = 0;
 		for (int i=0;i<critIndex;i++) {
-			offset += getLevels()[i].getDimension();
+			offset += getPerfMatrix().getLevels()[i].getDimension();
 		}
 		return offset;
 	}

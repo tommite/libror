@@ -57,11 +57,11 @@ public class RORSMAATest {
 				{39,26,36,37},
 				{37,21,8,37}};
 		perfMat = new Array2DRowRealMatrix(data);
-		ror = new RORSMAA(perfMat);
+		ror = new RORSMAA(new PerformanceMatrix(perfMat));
+		ror.setSampler(new GeneralValueFunctionSampler(ror, 10000));
 		ror.addPreference(9, 8); // DEN > AUT
 		ror.addPreference(2, 3); // SPA > SWE
 		ror.addPreference(10, 11); // FRA > CZE
-		ror.solve();
 		ror.compute();
 	}
 	
@@ -70,20 +70,6 @@ public class RORSMAATest {
 		assertEquals(4, ror.getNrCriteria());
 		assertEquals(20, ror.getNrAlternatives());
 	}
-
-	@Test
-	public void testNecessaryRelationFirstRow() {
-		RealMatrix necessaryRelation = ror.getNecessaryRelation();
-		assertArrayEquals(new double[]{1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, necessaryRelation.getRow(0), 0.001);
-	}
-	
-	@Test
-	public void testPossibleRelationThirdRow() {
-		RealMatrix possibleRelation = ror.getPossibleRelation();
-		assertArrayEquals(new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, possibleRelation.getRow(2), 0.001);
-	}
 	
 	@Test
 	public void testPOIFirstRow() {
@@ -91,26 +77,7 @@ public class RORSMAATest {
 		assertArrayEquals(new double[]{1.0, 0.7811, 1.0, 1.0, 0.9999, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, poi.getRow(0), 0.02);
 	}
-	
-	@Test
-	public void testSameDimMatrices() {
-		assertEquals(ror.getPossibleRelation().getColumnDimension(), ror.getPOIs().getColumnDimension());
-		assertEquals(ror.getPossibleRelation().getRowDimension(), ror.getPOIs().getRowDimension());
-	}
-	
-	@Test
-	public void testPOIsWithPossibleRelations() {
-		RealMatrix poi = ror.getPOIs();
-		RealMatrix pos = ror.getPossibleRelation();		
-		for (int i=0;i<pos.getRowDimension();i++) {
-			for (int j=0;j<pos.getColumnDimension();j++) {
-				if (poi.getEntry(i, j) > 0.0) {
-					assertTrue("pos vs poi failed at ("+i+","+j+")", pos.getEntry(i, j) > 0.0);
-				}
-			}
-		}
-	}
-	
+		
 	@Test
 	public void testRAIFirstRow() {
 		RealMatrix rai = ror.getRAIs();

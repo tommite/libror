@@ -21,12 +21,6 @@ package fi.smaa.libror;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.math.linear.ArrayRealVector;
-import org.apache.commons.math.linear.RealMatrix;
-import org.apache.commons.math.linear.RealVector;
 
 public class RORModel {
 	
@@ -39,33 +33,15 @@ public class RORModel {
 		public int b;
 	}	
 
-	protected RealMatrix perfMatrix;
+	protected PerformanceMatrix perfMatrix;
 	protected List<PrefPair> prefPairs = new ArrayList<PrefPair>();
-	protected RealVector[] levels;
 
-	protected RORModel(RealMatrix perfMatrix) {
+	protected RORModel(PerformanceMatrix perfMatrix) {
 		this.perfMatrix = perfMatrix;
-		initializeLevels(perfMatrix);
 	}
 
-	public RealMatrix getPerfMatrix() {
+	public PerformanceMatrix getPerfMatrix() {
 		return perfMatrix;
-	}
-
-	protected void initializeLevels(RealMatrix perfMatrix) {
-		levels = new RealVector[perfMatrix.getColumnDimension()];
-		for (int i=0;i<levels.length;i++) {
-			Set<Double> levelsSet = new TreeSet<Double>();
-			for (double d : perfMatrix.getColumn(i)) {
-				levelsSet.add(d);
-			}
-			RealVector lvl = new ArrayRealVector(levelsSet.toArray(new Double[0]));
-			levels[i] = lvl;
-		}
-	}
-
-	public RealVector[] getLevels() {
-		return levels;
 	}
 
 	/**
@@ -79,11 +55,15 @@ public class RORModel {
 	}
 
 	public int getNrCriteria() {
-		return perfMatrix.getColumnDimension();
+		return perfMatrix.getMatrix().getColumnDimension();
 	}
 
 	public int getNrAlternatives() {
-		return perfMatrix.getRowDimension();
+		return perfMatrix.getMatrix().getRowDimension();
+	}
+
+	public List<PrefPair> getPrefPairs() {
+		return prefPairs;
 	}
 
 }

@@ -21,18 +21,24 @@ package fi.smaa.libror.r;
 
 import org.apache.commons.math.linear.RealMatrix;
 
+import fi.smaa.libror.GeneralValueFunctionSampler;
 import fi.smaa.libror.PartialValueFunction;
+import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORSMAA;
 
-public class RORSMAARFacade extends UTAGMSSolverRFacade<RORSMAA> {
+public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	
+	private static final int NR_ITERS = 10000;
+
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RORSMAARFacade(double[] matrix, int nRows) {
-		super(new RORSMAA(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
+		super(new RORSMAA(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
+		GeneralValueFunctionSampler sampler = new GeneralValueFunctionSampler(model, NR_ITERS);
+		model.setSampler(sampler);
 	}
 
 	public void compute() {
@@ -63,13 +69,17 @@ public class RORSMAARFacade extends UTAGMSSolverRFacade<RORSMAA> {
 	
 	public double evaluateAlternative(int vfIndex, int alternative) {
 		assert(alternative >= 0);
-		RealMatrix pm = model.getPerfMatrix();
+		RealMatrix pm = model.getPerfMatrix().getMatrix();
 		double[] alt = pm.getRow(alternative);
 		return model.getSampler().getValueFunctions()[vfIndex].evaluate(alt);
 	}
 	
 	public int getMisses() {
-		return model.getSampler().getMisses();
+		if (model.getSampler() instanceof GeneralValueFunctionSampler) {
+			GeneralValueFunctionSampler s = (GeneralValueFunctionSampler) model.getSampler();
+			return s.getMisses();
+		}
+		return 0;
 	}
 	
 	public double[][] getRAIs() {

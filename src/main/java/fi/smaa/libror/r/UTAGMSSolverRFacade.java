@@ -20,24 +20,24 @@
 package fi.smaa.libror.r;
 
 import fi.smaa.libror.InfeasibleConstraintsException;
+import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.UTAGMSSolver;
 
-public class UTAGMSSolverRFacade<M extends UTAGMSSolver> extends RORRFacade<M> {
+public class UTAGMSSolverRFacade extends RORRFacade<UTAGMSSolver> {
 
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 */
-	@SuppressWarnings("unchecked")
 	public UTAGMSSolverRFacade(double[] matrix, int nRows) {
-		super((M) new UTAGMSSolver(RHelper.rArrayMatrixToRealMatrix(matrix, nRows)));
+		super(new UTAGMSSolver(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
 	}
 	
 	public void setStrictValueFunctions(boolean strict) {
 		model.setStrictValueFunctions(strict);
 	}
 	
-	protected UTAGMSSolverRFacade(M m) {
+	protected UTAGMSSolverRFacade(UTAGMSSolver m) {
 		super(m);
 	}
 

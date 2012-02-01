@@ -24,23 +24,28 @@ import org.apache.commons.math.linear.RealMatrix;
 
 import fi.smaa.common.ValueRanker;
 
-public class RORSMAA extends UTAGMSSolver {
+public class RORSMAA extends RORModel {
 
-	private static final int NR_ITERS = 10000;
-	private GeneralValueFunctionSampler sampler;
+	private ValueFunctionSampler sampler;
 	private RealMatrix poiMatrix;
 	private RealMatrix raiMatrix;
 
-	public RORSMAA(RealMatrix perfMatrix) {
+	public RORSMAA(PerformanceMatrix perfMatrix) {
 		super(perfMatrix);
-		this.sampler = new GeneralValueFunctionSampler(perfMatrix, NR_ITERS);
 	}
 	
-	public GeneralValueFunctionSampler getSampler() {
+	public void setSampler(ValueFunctionSampler sampler) {
+		this.sampler = sampler;
+	}
+	
+	public ValueFunctionSampler getSampler() {
 		return sampler;
 	}
 	
 	public void compute() {
+		if (sampler == null) {
+			throw new IllegalStateException("Sampler not set yet");
+		}
 		sampler.sample();
 		int nrAlt = getNrAlternatives();		
 		double[] evals = new double[nrAlt];
@@ -51,7 +56,7 @@ public class RORSMAA extends UTAGMSSolver {
 		for (FullValueFunction vf : sampler.getValueFunctions()) {
 			// evaluate all alts
 			for (int i=0;i<nrAlt;i++) {
-				evals[i] = vf.evaluate(perfMatrix.getRow(i));
+				evals[i] = vf.evaluate(perfMatrix.getMatrix().getRow(i));
 			}
 			// update poi hits
 			for (int i=0;i<nrAlt;i++) {
@@ -81,7 +86,6 @@ public class RORSMAA extends UTAGMSSolver {
 	@Override
 	public void addPreference(int a, int b) {
 		super.addPreference(a, b);
-		sampler.addPreference(a, b);
 	}
 	
 	/**
