@@ -58,7 +58,7 @@ public class RORSMAATest {
 				{37,21,8,37}};
 		perfMat = new Array2DRowRealMatrix(data);
 		ror = new RORSMAA(new PerformanceMatrix(perfMat));
-		ror.setSampler(new GeneralValueFunctionSampler(ror, 10000));
+		ror.setSampler(new RejectionValueFunctionSampler(ror, 10000));
 		ror.addPreference(9, 8); // DEN > AUT
 		ror.addPreference(2, 3); // SPA > SWE
 		ror.addPreference(10, 11); // FRA > CZE

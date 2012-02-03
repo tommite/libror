@@ -27,9 +27,9 @@ import org.apache.commons.math.linear.RealMatrix;
 import org.junit.Before;
 import org.junit.Test;
 
-public class GeneralValueFunctionSamplerTest {
+public class RejectionValueFunctionSamplerTest {
 
-	private GeneralValueFunctionSampler sampler;
+	private RejectionValueFunctionSampler sampler;
 
 	@Before
 	public void setUp() {
@@ -39,14 +39,14 @@ public class GeneralValueFunctionSamplerTest {
 		p.setRow(0, new double[] {1.0, 2.0, 3.0});
 		p.setRow(1, new double[] {1.0, 3.0, 4.0});
 		p.setRow(2, new double[] {2.0, -1.0, 3.0});
-		sampler = new GeneralValueFunctionSampler(new RORModel(new PerformanceMatrix(p)), 5);
+		sampler = new RejectionValueFunctionSampler(new RORModel(new PerformanceMatrix(p)), 5);
 	}
 	
 	@Test
 	public void testMonotonousEvals() {
 		sampler.sample();
-		for (FullValueFunction fvf : sampler.getValueFunctions()) {
-			for (PartialValueFunction vf : fvf.getPartialValueFunctions()) {
+		for (FullCardinalValueFunction fvf : sampler.getValueFunctions()) {
+			for (CardinalPartialValueFunction vf : fvf.getPartialValueFunctions()) {
 				double[] evals = vf.getEvals();
 				double prevVal = -1.0;
 				for (double eval : evals) {
@@ -65,9 +65,9 @@ public class GeneralValueFunctionSamplerTest {
 	@Test
 	public void testValueFunctionMaxsSumToUnity() {
 		sampler.sample();
-		for (FullValueFunction vf : sampler.getValueFunctions()) {
+		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
 			double sum = 0.0;
-			for (PartialValueFunction v : vf.getPartialValueFunctions()) {
+			for (CardinalPartialValueFunction v : vf.getPartialValueFunctions()) {
 				double[] ev = v.getEvals();
 				sum += ev[ev.length-1];
 			}

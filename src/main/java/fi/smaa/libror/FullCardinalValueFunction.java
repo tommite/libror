@@ -22,26 +22,26 @@ package fi.smaa.libror;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FullValueFunction {
+public class FullCardinalValueFunction {
 	
-	private List<PartialValueFunction> vfs = new ArrayList<PartialValueFunction>();
+	private List<CardinalPartialValueFunction> vfs = new ArrayList<CardinalPartialValueFunction>();
 
-	public FullValueFunction() {
+	public FullCardinalValueFunction() {
 	}
 	
-	public void addValueFunction(PartialValueFunction v) {
+	public void addValueFunction(CardinalPartialValueFunction v) {
 		vfs.add(v);
 	}
 	
 	public String toString() {
 		String retStr = "";
-		for (PartialValueFunction vf : vfs) {
+		for (CardinalPartialValueFunction vf : vfs) {
 			retStr += vf.toString() + "\n";
 		}
 		return retStr;
 	}
 	
-	public List<PartialValueFunction> getPartialValueFunctions() {
+	public List<CardinalPartialValueFunction> getPartialValueFunctions() {
 		return vfs;
 	}
 	

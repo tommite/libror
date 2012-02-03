@@ -21,10 +21,11 @@ package fi.smaa.libror.r;
 
 import org.apache.commons.math.linear.RealMatrix;
 
-import fi.smaa.libror.GeneralValueFunctionSampler;
-import fi.smaa.libror.PartialValueFunction;
+import fi.smaa.libror.CardinalPartialValueFunction;
+import fi.smaa.libror.ValueFunctionSampler;
 import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORSMAA;
+import fi.smaa.libror.RejectionValueFunctionSampler;
 
 public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	
@@ -37,7 +38,7 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	 */
 	public RORSMAARFacade(double[] matrix, int nRows) {
 		super(new RORSMAA(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
-		GeneralValueFunctionSampler sampler = new GeneralValueFunctionSampler(model, NR_ITERS);
+		RejectionValueFunctionSampler sampler = new RejectionValueFunctionSampler(model, NR_ITERS);
 		model.setSampler(sampler);
 	}
 
@@ -46,12 +47,12 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	}
 	
 	public double[] getValueFunctionVals(int vfIndex, int partialVfIndex) {
-		PartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialVfIndex);		
+		CardinalPartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialVfIndex);		
 		return vf.getVals();
 	}
 	
 	public double[] getValueFunctionEvals(int vfIndex, int partialvfIndex) {
-		PartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialvfIndex);		
+		CardinalPartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialvfIndex);		
 		return vf.getEvals();
 	}
 	
@@ -75,8 +76,8 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	}
 	
 	public int getMisses() {
-		if (model.getSampler() instanceof GeneralValueFunctionSampler) {
-			GeneralValueFunctionSampler s = (GeneralValueFunctionSampler) model.getSampler();
+		if (model.getSampler() instanceof RejectionValueFunctionSampler) {
+			ValueFunctionSampler s = (ValueFunctionSampler) model.getSampler();
 			return s.getMisses();
 		}
 		return 0;

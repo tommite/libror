@@ -25,31 +25,35 @@ import java.util.List;
 
 import fi.smaa.libror.RORModel.PrefPair;
 
-public class GeneralValueFunctionSampler extends ValueFunctionSampler {
 
-	private double[] w;
-	private int misses;
-	
+public class RejectionValueFunctionSampler extends ValueFunctionSampler {
+
+	protected FullCardinalValueFunction[] vfs;
+
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
 	 *  
 	 * @param perfMatrix the performanceMatrix to use.
 	 * @param count the amount of functions to sample, > 0
 	 */
-	public GeneralValueFunctionSampler(RORModel model, int count) {
-		super(model, count);
-		w = new double[model.getNrCriteria()];
-	}
-		
-	public int getMisses() {
-		return misses;
+	public RejectionValueFunctionSampler(RORModel model, int count) {
+		super(model);
+		vfs = new FullCardinalValueFunction[count];
 	}
 	
-	public void sample() {		
+	public FullCardinalValueFunction[] getValueFunctions() {
+		if (vfs == null) {
+			throw new IllegalStateException("sample() not called");
+		}
+		return vfs;
+	}
+
+		
+	public void doSample() {
 		misses = 0;
 		for (int i=0;i<vfs.length;i++) {
 			while (true) {
-				FullValueFunction vf = sampleValueFunction();
+				FullCardinalValueFunction vf = sampleValueFunction();
 				if (isHit(vf)) {
 					vfs[i] = vf;
 					break;
@@ -61,7 +65,34 @@ public class GeneralValueFunctionSampler extends ValueFunctionSampler {
 	}
 
 	
-	boolean isHit(FullValueFunction vf) {
+	private FullCardinalValueFunction  sampleValueFunction() {
+		FullCardinalValueFunction vf = new FullCardinalValueFunction();
+		
+		List<double[]> partVals = new ArrayList<double[]>();		
+		List<double[]> partEvals = new ArrayList<double[]>();
+		
+		for (int i=0;i<model.getNrCriteria();i++) {
+			double[] vals = model.getPerfMatrix().getLevels()[i].getData();
+			partVals.add(vals);
+			partEvals.add(createPartialValues(vals.length));	
+		}
+		
+		
+		sampleWeights();
+		
+		// scale the partial value functions with weights
+		for (int i=0;i<model.getNrCriteria();i++) {
+			double[] evals = partEvals.get(i);
+			for (int j=0;j<evals.length;j++) {
+				evals[j] *= w[i];
+			}
+			vf.addValueFunction(new CardinalPartialValueFunction(partVals.get(i), evals));
+		}
+		
+		return vf;
+	}
+	
+	private boolean isHit(FullCardinalValueFunction vf) {
 		double[] values = new double[model.getNrAlternatives()];	
 		for (int i=0;i<values.length;i++) {
 			values[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
@@ -74,33 +105,6 @@ public class GeneralValueFunctionSampler extends ValueFunctionSampler {
 		}
 		
 		return true;
-	}
-
-	private FullValueFunction  sampleValueFunction() {
-		FullValueFunction vf = new FullValueFunction();
-		
-		List<double[]> partVals = new ArrayList<double[]>();		
-		List<double[]> partEvals = new ArrayList<double[]>();
-		
-		for (int i=0;i<model.getNrCriteria();i++) {
-			double[] vals = model.getPerfMatrix().getLevels()[i].getData();
-			partVals.add(vals);
-			partEvals.add(createPartialValues(vals.length));	
-		}
-		
-		// sample weights
-		RandomUtil.createSumToOneRand(w);
-		
-		// scale the partial value functions with weights
-		for (int i=0;i<model.getNrCriteria();i++) {
-			double[] evals = partEvals.get(i);
-			for (int j=0;j<evals.length;j++) {
-				evals[j] *= w[i];
-			}
-			vf.addValueFunction(new PartialValueFunction(partVals.get(i), evals));
-		}
-		
-		return vf;
 	}
 
 	private double[] createPartialValues(int length) {

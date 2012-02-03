@@ -26,7 +26,7 @@ import fi.smaa.common.ValueRanker;
 
 public class RORSMAA extends RORModel {
 
-	private ValueFunctionSampler sampler;
+	private RejectionValueFunctionSampler sampler;
 	private RealMatrix poiMatrix;
 	private RealMatrix raiMatrix;
 
@@ -34,11 +34,11 @@ public class RORSMAA extends RORModel {
 		super(perfMatrix);
 	}
 	
-	public void setSampler(ValueFunctionSampler sampler) {
+	public void setSampler(RejectionValueFunctionSampler sampler) {
 		this.sampler = sampler;
 	}
 	
-	public ValueFunctionSampler getSampler() {
+	public RejectionValueFunctionSampler getSampler() {
 		return sampler;
 	}
 	
@@ -53,7 +53,7 @@ public class RORSMAA extends RORModel {
 		int[][] raiHits = new int[nrAlt][nrAlt];
 		int[] ranks = new int[nrAlt];
 
-		for (FullValueFunction vf : sampler.getValueFunctions()) {
+		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
 			// evaluate all alts
 			for (int i=0;i<nrAlt;i++) {
 				evals[i] = vf.evaluate(perfMatrix.getMatrix().getRow(i));

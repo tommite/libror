@@ -19,7 +19,7 @@
 
 package fi.smaa.libror;
 
-public class PartialValueFunction {
+public class CardinalPartialValueFunction {
 	
 	private double[] vals;
 	private double[] evals;
@@ -34,7 +34,7 @@ public class PartialValueFunction {
 	 * @param vals performances (real scores)
 	 * @param evals corresponding values v(val)
 	 */
-	public PartialValueFunction(double[] vals, double[] evals) {
+	public CardinalPartialValueFunction(double[] vals, double[] evals) {
 		if (evals.length != vals.length || evals.length < 2 || evals[0] != 0.0) {
 			throw new IllegalArgumentException("PRECOND violation");
 		}
@@ -88,6 +88,9 @@ public class PartialValueFunction {
 		return evals;
 	}
 	
+	/* (non-Javadoc)
+	 * @see fi.smaa.libror.PartialValueFunction#getVals()
+	 */
 	public double[] getVals() {
 		return vals;
 	}
