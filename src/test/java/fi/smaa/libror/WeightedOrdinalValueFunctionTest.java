@@ -2,6 +2,8 @@ package fi.smaa.libror;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,5 +37,21 @@ public class WeightedOrdinalValueFunctionTest {
 	public void testSetWeight() {
 		wf.setWeight(1, 0.8);
 		assertArrayEquals(new double[]{1.0, 0.8}, wf.getWeights(), 0.0001);		
+	}
+	
+	@Test
+	public void testDeepCopy() {
+		WeightedOrdinalValueFunction nf = wf.deepCopy();
+		assertTrue(Arrays.equals(nf.getWeights(), wf.getWeights()));
+		assertEquals(nf.getPartialValueFunctions().size(), wf.getPartialValueFunctions().size());
+	}
+	
+	@Test
+	public void testEvaluate() {
+		wf.setWeight(0, 0.2);
+		wf.setWeight(1, 0.8);
+
+		int[] inds = new int[] {2, 0};
+		assertEquals(0.2, wf.evaluate(inds), 0.00001);
 	}
 }

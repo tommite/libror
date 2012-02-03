@@ -1,9 +1,10 @@
 package fi.smaa.libror;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class WeightedOrdinalValueFunction {
+public class WeightedOrdinalValueFunction implements DeepCopiable<WeightedOrdinalValueFunction> {
 	public static final double WTOL = 0.01;
 	
 	private double[] weights = new double[0];
@@ -12,6 +13,16 @@ public class WeightedOrdinalValueFunction {
 	public void addValueFunction(OrdinalPartialValueFunction v) {
 		vfs.add(v);
 		reinitWeights();
+	}
+	
+	public double evaluate(int[] indices) {
+		double sum = 0.0;
+		for (int i=0;i<vfs.size();i++) {
+			OrdinalPartialValueFunction f = vfs.get(i);
+			double[] vals = f.getValues();
+			sum += vals[indices[i]] * weights[i];
+		}
+		return sum;
 	}
 
 	private void reinitWeights() {
@@ -47,6 +58,7 @@ public class WeightedOrdinalValueFunction {
 		weights[index] = weight;
 	}
 
+	@Override
 	public String toString() {
 		String retStr = "";
 		int i=0;
@@ -55,5 +67,18 @@ public class WeightedOrdinalValueFunction {
 			i++;
 		}
 		return retStr;
+	}
+
+	public WeightedOrdinalValueFunction deepCopy() {
+		WeightedOrdinalValueFunction f = new WeightedOrdinalValueFunction();
+		for (OrdinalPartialValueFunction pf : vfs) {
+			f.addValueFunction(pf.deepCopy());
+		}
+		f.weights = Arrays.copyOf(weights, weights.length);
+		return f;
+	}
+
+	public void setWeights(double[] weights) {
+		this.weights = weights;
 	}
 }

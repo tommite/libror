@@ -1,6 +1,6 @@
 package fi.smaa.libror;
 
-public class OrdinalPartialValueFunction {
+public class OrdinalPartialValueFunction implements DeepCopiable<OrdinalPartialValueFunction> {
 
 	private double[] values;
 
@@ -30,5 +30,13 @@ public class OrdinalPartialValueFunction {
 			throw new IllegalArgumentException("invalid value");
 		}
 		values[index] = value;
+	}
+
+	public OrdinalPartialValueFunction deepCopy() {
+		OrdinalPartialValueFunction n = new OrdinalPartialValueFunction(values.length);
+		for (int i=0;i<values.length;i++) {
+			n.values[i] = values[i];
+		}
+		return n;
 	}
 }

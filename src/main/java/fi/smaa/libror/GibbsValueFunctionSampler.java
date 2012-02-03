@@ -1,6 +1,9 @@
 package fi.smaa.libror;
 
+import java.util.Arrays;
 import java.util.List;
+
+import fi.smaa.libror.RORModel.PrefPair;
 
 public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	
@@ -22,6 +25,10 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		this(model, count, thinning, null);
 	}
 	
+	public WeightedOrdinalValueFunction[] getValueFunctions() {
+		return vfs;
+	}
+	
 	public int getThinning() {
 		return thinning;
 	}
@@ -37,42 +44,81 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 			generateStartingPoint();
 		}
 			
-		// TODO Auto-generated method stub
 		int nrPartVF = currentVF.getPartialValueFunctions().size();
 		int[] sizPartVF = getPartialVFSizes(currentVF.getPartialValueFunctions());
 		
 		int curVFind = 0;
-		int curPartVFind = 0; // curPartVF == (amount of part VFs) means to sample the weight
+		int curPartVFind = 1; // curPartVF == (amount of part VFs) means to sample the weight
+		// and 0 is always 0.0 value so we don't sample it 
 		
 		int iter = 0;
-		int maxIters = getNrValueFunctions() * thinning;
+		
+		boolean store = true;
+		int index = 1;
 				
-		while (iter < maxIters) {
-			if (curPartVFind == sizPartVF[curVFind]) { // update weight
+		vfs[0] = currentVF.deepCopy();
+		
+		while (index < vfs.length) {
+			store = false;
+			if (curPartVFind == sizPartVF[curVFind]-1) { // update weight
 				// if it's the last one, don't do anything (it's dependent on others as \sum_i w_i=1
-				if (curVFind == (nrPartVF-1)) {
-					// don't count this iteration
-					iter--;
-				} else {
+				if (curVFind != (nrPartVF-1)) {
 					assert(curVFind < (nrPartVF-1));
-					double newW = sampleWeight(curPartVFind, currentVF.getWeights());
-					currentVF.setWeight(curPartVFind, newW);
+					double[] weights = currentVF.getWeights();
+					double newW = sampleWeight(curVFind, weights);
+					double[] oldWeights = Arrays.copyOf(weights, weights.length);
+					currentVF.setWeight(curVFind, newW);
 					setLastWeight(currentVF); // set last weight so that they sum to 1.0
+					if (failsRejectCriterion(currentVF)) {
+						currentVF.setWeights(oldWeights);
+					}
+					store = true;
 				}
+			} else { // update characteristic point
+				OrdinalPartialValueFunction vf = currentVF.getPartialValueFunctions().get(curVFind);
+				double point = samplePoint(curPartVFind, vf);
+				vf.setValue(curPartVFind, point);
+				store = true;
 			}
 			
 			// UPDATE INDICES
-			if (curPartVFind < sizPartVF[curVFind]) {
+			if (curPartVFind < sizPartVF[curVFind]-1) {
 				curPartVFind++;
 			}
 			else { // advance to next partial vf
-				curPartVFind = 0;
+				curPartVFind = 1;
 				curVFind = (curVFind + 1) % nrPartVF;
 			}
-			iter++;
+			if (store) {
+				iter++;
+				if (iter % thinning == 0) {
+					vfs[index] = currentVF.deepCopy();
+					index++;
+				}
+			}
 		}
 		
 		
+	}
+
+	private boolean failsRejectCriterion(WeightedOrdinalValueFunction vf) {
+		PerformanceMatrix pm = model.getPerfMatrix();		
+		for (PrefPair pref : model.getPrefPairs()) {
+			int[] alevels = pm.getLevelIndices(pref.a);
+			int[] blevels = pm.getLevelIndices(pref.b);
+			if (vf.evaluate(alevels) < vf.evaluate(blevels)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private double samplePoint(int ind, OrdinalPartialValueFunction vf) {
+		double[] vals = vf.getValues();
+		double lb = vals[ind-1];
+		double ub = vals[ind+1];
+		
+		return lb + (rng.nextDouble() * (ub - lb));
 	}
 
 	private void setLastWeight(WeightedOrdinalValueFunction vf) {
@@ -85,16 +131,13 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	}
 
 	private double sampleWeight(int curPartVFind, double[] w) {
-		double lb = 0.0;
-		double ub = 1.0;
-		if (curPartVFind > 0) {
-			lb = w[curPartVFind-1];
-		}
-		if (curPartVFind < (w.length-1)) {
-			ub = w[curPartVFind+1];
-		}
-		
-		return lb + (rng.nextDouble() * (ub - lb));
+		double sum = 0.0;
+		for (int i=0;i<w.length-1;i++) {
+			if (i != curPartVFind) {
+				sum += w[i];
+			}
+		}		
+		return rng.nextDouble() * (1.0 - sum);
 	}
 
 	private int[] getPartialVFSizes(List<OrdinalPartialValueFunction> levels) {

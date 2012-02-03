@@ -66,4 +66,15 @@ public class PerformanceMatrixTest {
 		assertEquals(new ArrayRealVector(new double[]{21.0, 26.0, 28.0, 34.0, 36.0, 37.0, 40.0, 41.0, 43.0, 50.0, 
 				53.0, 57.0, 59.0, 61.0, 73.0, 77.0, 91.0, 94.0}), lvls[1]);
 	}
+	
+	@Test
+	public void testGetLevelIndex() {
+		assertEquals(8, matrix.getLevelIndex(0, 2));
+		assertEquals(13, matrix.getLevelIndex(0, 0));
+	}
+	
+	@Test
+	public void testGetLevelIndices() {
+		assertArrayEquals(new int[]{13, 17, 8, 12}, matrix.getLevelIndices(0));
+	}
 }
