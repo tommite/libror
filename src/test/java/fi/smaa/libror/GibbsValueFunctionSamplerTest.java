@@ -21,7 +21,7 @@ public class GibbsValueFunctionSamplerTest {
 	private int[] a2inds;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InvalidStartingPointException {
 		double[][] data = new double[][]{
 				{1,2,3},
 				{2,1,2},
@@ -43,7 +43,7 @@ public class GibbsValueFunctionSamplerTest {
 		a1inds = new int[]{0, 1, 1};
 		a2inds = new int[]{1, 0, 0};
 
-		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);	
+		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);
 	}
 	
 	@Test
@@ -77,8 +77,31 @@ public class GibbsValueFunctionSamplerTest {
 		}
 	}
 	
-	@Test
-	public void testInvalidStartingPoint() {
-		fail();
+	@Test(expected=InvalidStartingPointException.class)
+	public void testInvalidStartingPointWeights() throws InvalidStartingPointException {
+		spoint.setWeight(0, 0.0);
+		spoint.setWeight(1, 8.0);
+		spoint.setWeight(2, 0.0);
+		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);
+	}
+	
+	@Test(expected=InvalidStartingPointException.class)
+	public void testInvalidStartingPointNrPartialVF() throws InvalidStartingPointException {
+		spoint = new WeightedOrdinalValueFunction();
+		spoint.addValueFunction(vf1);
+		spoint.addValueFunction(vf2);
+
+		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);
+	}
+	
+	@Test(expected=InvalidStartingPointException.class)
+	public void testInvalidStartingPointNrPartialVFLevels() throws InvalidStartingPointException {
+		spoint = new WeightedOrdinalValueFunction();
+		vf1 = new OrdinalPartialValueFunction(4);
+		spoint.addValueFunction(vf1);
+		spoint.addValueFunction(vf2);
+		spoint.addValueFunction(vf3);
+
+		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);
 	}
 }

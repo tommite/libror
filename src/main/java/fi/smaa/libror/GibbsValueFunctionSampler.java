@@ -3,6 +3,8 @@ package fi.smaa.libror;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math.linear.RealVector;
+
 import fi.smaa.libror.RORModel.PrefPair;
 
 public class GibbsValueFunctionSampler extends ValueFunctionSampler {
@@ -11,18 +13,45 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	private int thinning;
 	private WeightedOrdinalValueFunction startingPoint;
 	
-	public GibbsValueFunctionSampler(RORModel model, int count, int thinning, WeightedOrdinalValueFunction startingPoint) {
+	public GibbsValueFunctionSampler(RORModel model, int count, int thinning, 
+			WeightedOrdinalValueFunction startingPoint) throws InvalidStartingPointException {
 		super(model);
-		if (startingPoint != null && !startingPoint.areValidWeights()) {
-			throw new IllegalArgumentException("PRECOND: starting point has invalid weights (not summing to 1.0)");
+		checkStartingPoint(startingPoint);
+		init(count, thinning, startingPoint);
+	}
+
+	private void checkStartingPoint(WeightedOrdinalValueFunction p) throws InvalidStartingPointException {
+		if (!p.areValidWeights()) {
+			throw new InvalidStartingPointException("Weights not summing to 1.0");
 		}
+		List<OrdinalPartialValueFunction> pvfs = p.getPartialValueFunctions();
+		RealVector[] lvls = model.getPerfMatrix().getLevels();
+		if (lvls.length != pvfs.size()) {
+			throw new InvalidStartingPointException("Incorrect amount of partial value functions");
+		}
+		for (int i=0;i<lvls.length;i++) {
+			if (pvfs.get(i).getValues().length != lvls[i].getDimension()) {
+				throw new InvalidStartingPointException("Incorrect amount of levels in partial value function #" + (i+1));
+			}
+		}
+	}
+
+	private void init(int count, int thinning, WeightedOrdinalValueFunction startingPoint) {
+		if (count < 1) {
+			throw new IllegalArgumentException("PRECOND violated: count < 1");
+		}
+		if (thinning < 1) {
+			throw new IllegalArgumentException("PRECOND violated: thinning < 1");
+		}
+
 		this.startingPoint = startingPoint;
 		vfs = new WeightedOrdinalValueFunction[count];
 		this.thinning = thinning;
 	}
 
 	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) {
-		this(model, count, thinning, null);
+		super(model);
+		init(count, thinning, startingPoint);
 	}
 	
 	public WeightedOrdinalValueFunction[] getValueFunctions() {
