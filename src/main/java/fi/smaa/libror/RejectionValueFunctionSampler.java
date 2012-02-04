@@ -29,6 +29,7 @@ import fi.smaa.libror.RORModel.PrefPair;
 public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 
 	protected FullCardinalValueFunction[] vfs;
+	private int maxTries = Integer.MAX_VALUE;
 
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
@@ -41,6 +42,12 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 		vfs = new FullCardinalValueFunction[count];
 	}
 	
+	public RejectionValueFunctionSampler(RORModel model, int count, int maxIters) {
+		super(model);
+		vfs = new FullCardinalValueFunction[count];
+		maxTries = maxIters;
+	}
+	
 	public FullCardinalValueFunction[] getValueFunctions() {
 		if (vfs == null) {
 			throw new IllegalStateException("sample() not called");
@@ -49,10 +56,11 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 	}
 
 		
-	public void doSample() {
+	public void doSample() throws SamplingException {
 		misses = 0;
 		for (int i=0;i<vfs.length;i++) {
-			while (true) {
+			int currentTry = 0;
+			while (currentTry < maxTries) {
 				FullCardinalValueFunction vf = sampleValueFunction();
 				if (isHit(vf)) {
 					vfs[i] = vf;
@@ -60,6 +68,10 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 				} else {
 					misses++;
 				}
+				currentTry++;
+			}
+			if (currentTry == maxTries) {
+				throw new SamplingException("No sample found within " + maxTries + " rejection iterations");
 			}
 		}
 	}

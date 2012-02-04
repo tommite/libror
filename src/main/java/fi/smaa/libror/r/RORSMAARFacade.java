@@ -22,6 +22,7 @@ package fi.smaa.libror.r;
 import org.apache.commons.math.linear.RealMatrix;
 
 import fi.smaa.libror.CardinalPartialValueFunction;
+import fi.smaa.libror.SamplingException;
 import fi.smaa.libror.ValueFunctionSampler;
 import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORSMAA;
@@ -42,8 +43,13 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 		model.setSampler(sampler);
 	}
 
-	public void compute() {
-		model.compute();
+	public String compute() {
+		try {
+			model.compute();
+			return "";
+		} catch (SamplingException e) {
+			return "Error sampling: " + e.getMessage();
+		}
 	}
 	
 	public double[] getValueFunctionVals(int vfIndex, int partialVfIndex) {
@@ -68,8 +74,19 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 		return model.getSampler().getValueFunctions()[vfIndex].evaluate(point);
 	}
 	
+	/**
+	 * 
+	 * @param vfIndex PRECOND: >= 0
+	 * @param alternative PRECOND: >= 0
+	 * @return
+	 */
 	public double evaluateAlternative(int vfIndex, int alternative) {
-		assert(alternative >= 0);
+		if (alternative < 0) {
+			throw new IllegalArgumentException("alternative < 0");
+		}
+		if (vfIndex < 0) {
+			throw new IllegalArgumentException("vfIndex < 0");
+		}
 		RealMatrix pm = model.getPerfMatrix().getMatrix();
 		double[] alt = pm.getRow(alternative);
 		return model.getSampler().getValueFunctions()[vfIndex].evaluate(alt);

@@ -34,7 +34,7 @@ public class RORSMAATest {
 	private static RORSMAA ror;
 
 	@BeforeClass
-	public static void setUpForAll() throws InfeasibleConstraintsException {
+	public static void setUpForAll() throws InfeasibleConstraintsException, SamplingException {
 		double[][] data = new double[][]{
 				{82,94,80,91},
 				{74,91,96,82},

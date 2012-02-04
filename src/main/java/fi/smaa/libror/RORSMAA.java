@@ -42,7 +42,7 @@ public class RORSMAA extends RORModel {
 		return sampler;
 	}
 	
-	public void compute() {
+	public void compute() throws SamplingException {
 		if (sampler == null) {
 			throw new IllegalStateException("Sampler not set yet");
 		}

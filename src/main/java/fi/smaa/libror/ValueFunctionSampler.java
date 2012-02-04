@@ -19,12 +19,12 @@ public abstract class ValueFunctionSampler {
 		return misses;
 	}
 	
-	public void sample() {
+	public void sample() throws SamplingException {
 		misses = 0;
 		doSample();
 	}
 
-	protected abstract void doSample();
+	protected abstract void doSample() throws SamplingException;
 
 	protected void sampleWeights() {
 		RandomUtil.createSumToOneRand(w);

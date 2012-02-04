@@ -9,6 +9,7 @@ import fi.smaa.libror.RORModel.PrefPair;
 
 public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	
+	private static final int MAX_STARTINGPOINT_ITERS = 10000;
 	private WeightedOrdinalValueFunction[] vfs;
 	private int thinning;
 	private WeightedOrdinalValueFunction startingPoint;
@@ -19,6 +20,12 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		checkStartingPoint(startingPoint);
 		init(count, thinning, startingPoint);
 	}
+	
+	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) throws InvalidStartingPointException {
+		super(model);
+		startingPoint = generateStartingPoint();
+		init(count, thinning, startingPoint);
+	}	
 
 	private void checkStartingPoint(WeightedOrdinalValueFunction p) throws InvalidStartingPointException {
 		if (!p.areValidWeights()) {
@@ -48,11 +55,6 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		vfs = new WeightedOrdinalValueFunction[count];
 		this.thinning = thinning;
 	}
-
-	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) {
-		super(model);
-		init(count, thinning, startingPoint);
-	}
 	
 	public WeightedOrdinalValueFunction[] getValueFunctions() {
 		return vfs;
@@ -68,10 +70,7 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 
 	@Override
 	public void doSample() {
-		WeightedOrdinalValueFunction currentVF = startingPoint;
-		if (currentVF == null) {
-			generateStartingPoint();
-		}
+		WeightedOrdinalValueFunction currentVF = startingPoint.deepCopy();
 			
 		int nrPartVF = currentVF.getPartialValueFunctions().size();
 		int[] sizPartVF = getPartialVFSizes(currentVF.getPartialValueFunctions());
@@ -177,9 +176,35 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		return sizes;
 	}
 
-	private WeightedOrdinalValueFunction generateStartingPoint() {
-		// TODO Auto-generated method stub
-		return null;
+	public WeightedOrdinalValueFunction generateStartingPoint() throws InvalidStartingPointException {
+		RejectionValueFunctionSampler rejs = new RejectionValueFunctionSampler(model, 1, MAX_STARTINGPOINT_ITERS);
+		try {
+			rejs.sample();
+		} catch (SamplingException e) {
+			throw new InvalidStartingPointException("Cannot find starting point: infeasible preferences");
+		}
+		
+		FullCardinalValueFunction point = rejs.getValueFunctions()[0];
+		return convertCardinalVFToOrdinal(point);
+	}
+
+	private WeightedOrdinalValueFunction convertCardinalVFToOrdinal(FullCardinalValueFunction point) {
+		WeightedOrdinalValueFunction vf = new WeightedOrdinalValueFunction();
+		double[] w = point.getWeights();
+		
+		int index = 0;
+		for (CardinalPartialValueFunction f : point.getPartialValueFunctions()) {
+			double[] lvls = Arrays.copyOf(f.getEvals(), f.getEvals().length);
+			OrdinalPartialValueFunction of = new OrdinalPartialValueFunction(lvls.length);
+			for (int i=1;i<lvls.length-1;i++) {
+				of.setValue(i, lvls[i] / w[index]);
+			}
+			index++;
+			vf.addValueFunction(of);
+		}
+		vf.setWeights(w);
+		
+		return vf;
 	}
 
 	public WeightedOrdinalValueFunction getStartingPoint() {

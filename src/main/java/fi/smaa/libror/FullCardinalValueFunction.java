@@ -54,4 +54,13 @@ public class FullCardinalValueFunction {
 		}
 		return sum;
 	}
+	
+	public double[] getWeights() {
+		double[] w = new double[vfs.size()];
+		for (int i=0;i<w.length;i++) {
+			double[] evals = vfs.get(i).getEvals();
+			w[i] = evals[evals.length-1];
+		}
+		return w;
+	}
 }

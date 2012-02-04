@@ -43,7 +43,7 @@ public class RejectionValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testMonotonousEvals() {
+	public void testMonotonousEvals() throws SamplingException {
 		sampler.sample();
 		for (FullCardinalValueFunction fvf : sampler.getValueFunctions()) {
 			for (CardinalPartialValueFunction vf : fvf.getPartialValueFunctions()) {
@@ -63,7 +63,7 @@ public class RejectionValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testValueFunctionMaxsSumToUnity() {
+	public void testValueFunctionMaxsSumToUnity() throws SamplingException {
 		sampler.sample();
 		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
 			double sum = 0.0;

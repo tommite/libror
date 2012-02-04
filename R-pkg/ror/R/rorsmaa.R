@@ -7,7 +7,10 @@ rorsmaa <- function(performances, preferences, necessary=TRUE) {
       ror.addPreference(ror, preferences[i,1], preferences[i,2])
     }
   }
-  rorsmaa.compute(ror)
+  rets <- rorsmaa.compute(ror)
+  if (nchar(rets) > 0) {
+    stop(rets)
+  }
 
   poi <- rorsmaa.getPOIs(ror)
   rai <- rorsmaa.getRAIs(ror)
@@ -56,7 +59,8 @@ rorsmaa.allValueFunctions <- function(ror) {
 }
 
 rorsmaa.compute <- function(ror) {
-  .jcall(ror$model, method="compute")
+  rets <- .jcall(ror$model, "S", method="compute")
+  return(.jstrVal(rets))
 }
 
 rorsmaa.evaluateAlternative <- function(ror, vfIndex, altIndex) {

@@ -62,7 +62,7 @@ public class GibbsValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testWeightSampling() {
+	public void testWeightSampling() throws SamplingException {
 		double[] origw = spoint.getWeights().clone();
 		s.sample();
 		double[] neww = s.getValueFunctions()[9].getWeights();
@@ -70,7 +70,7 @@ public class GibbsValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testValueFunctions() {
+	public void testValueFunctions() throws SamplingException {
 		s.sample();
 		for (WeightedOrdinalValueFunction vf : s.getValueFunctions()) {
 			assertTrue(vf.evaluate(a1inds) > vf.evaluate(a2inds));
@@ -103,5 +103,28 @@ public class GibbsValueFunctionSamplerTest {
 		spoint.addValueFunction(vf3);
 
 		s = new GibbsValueFunctionSampler(ror, 10, 2, spoint);
+	}
+	
+	@Test
+	public void testGenerateStartingPoint() throws InvalidStartingPointException {
+		WeightedOrdinalValueFunction point = s.generateStartingPoint();
+		assertTrue(point.evaluate(a1inds) > point.evaluate(a2inds));
+	}
+	
+	@Test(expected=InvalidStartingPointException.class)
+	public void testGenerateStartingPointInfeasible() throws InvalidStartingPointException {
+		double[][] data = new double[][]{
+				{1,1,1},
+				{0,0,0}};
+		perfMat = new Array2DRowRealMatrix(data);
+		ror = new RORSMAA(new PerformanceMatrix(perfMat));
+		spoint = new WeightedOrdinalValueFunction();
+		vf1 = new OrdinalPartialValueFunction(2);
+		vf2 = new OrdinalPartialValueFunction(2);
+		spoint.addValueFunction(vf1);
+		spoint.addValueFunction(vf2);
+		ror.addPreference(1, 0);
+
+		s = new GibbsValueFunctionSampler(ror, 10, 2);
 	}
 }
