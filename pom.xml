@@ -4,7 +4,7 @@
   <groupId>fi.smaa</groupId>
   <artifactId>libror</artifactId>
   <name>libror</name>
-  <version>0.4.1</version>
+  <version>0.8</version>
 
   <repositories>
     <repository>
