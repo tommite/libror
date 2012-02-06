@@ -21,29 +21,34 @@ package fi.smaa.libror.r;
 
 import fi.smaa.libror.InfeasibleConstraintsException;
 import fi.smaa.libror.PerformanceMatrix;
+import fi.smaa.libror.RORModel;
 import fi.smaa.libror.UTAGMSSolver;
 
-public class UTAGMSSolverRFacade extends RORRFacade<UTAGMSSolver> {
+public class UTAGMSSolverRFacade extends RORRFacade {
+
+	private UTAGMSSolver solver;
 
 	/**
 	 * @param matrix matrix in row-major representation
 	 * @param nRows > 0
 	 */
 	public UTAGMSSolverRFacade(double[] matrix, int nRows) {
-		super(new UTAGMSSolver(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
+		super(new RORModel(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
+		solver = new UTAGMSSolver(this.model);
 	}
 	
 	public void setStrictValueFunctions(boolean strict) {
-		model.setStrictValueFunctions(strict);
+		solver.setStrictValueFunctions(strict);
 	}
 	
 	protected UTAGMSSolverRFacade(UTAGMSSolver m) {
-		super(m);
+		super(m.getModel());
+		solver = m;
 	}
 
 	public int solve() {
 		try {
-			model.solve();
+			solver.solve();
 		} catch (InfeasibleConstraintsException e) {
 			return 0;
 		}
@@ -51,14 +56,14 @@ public class UTAGMSSolverRFacade extends RORRFacade<UTAGMSSolver> {
 	}
 	
 	public void printModel(boolean necessary, int a, int b) {
-		model.printModel(necessary, a, b);
+		solver.printModel(necessary, a, b);
 	}
 	
 	public double[][] getNecessaryRelation() {
-		return model.getNecessaryRelation().getData();
+		return solver.getNecessaryRelation().getData();
 	}
 	
 	public double[][] getPossibleRelation() {
-		return model.getPossibleRelation().getData();
+		return solver.getPossibleRelation().getData();
 	}	
 }

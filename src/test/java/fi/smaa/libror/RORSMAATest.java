@@ -57,18 +57,18 @@ public class RORSMAATest {
 				{39,26,36,37},
 				{37,21,8,37}};
 		perfMat = new Array2DRowRealMatrix(data);
-		ror = new RORSMAA(new PerformanceMatrix(perfMat));
-		ror.setSampler(new RejectionValueFunctionSampler(ror, 10000));
-		ror.addPreference(9, 8); // DEN > AUT
-		ror.addPreference(2, 3); // SPA > SWE
-		ror.addPreference(10, 11); // FRA > CZE
+		ror = new RORSMAA(new RORModel(new PerformanceMatrix(perfMat)));
+		ror.setSampler(new RejectionValueFunctionSampler(ror.getModel(), 10000));
+		ror.getModel().addPreference(9, 8); // DEN > AUT
+		ror.getModel().addPreference(2, 3); // SPA > SWE
+		ror.getModel().addPreference(10, 11); // FRA > CZE
 		ror.compute();
 	}
 	
 	@Test
 	public void testGetNrAltsCrits() {
-		assertEquals(4, ror.getNrCriteria());
-		assertEquals(20, ror.getNrAlternatives());
+		assertEquals(4, ror.getModel().getNrCriteria());
+		assertEquals(20, ror.getModel().getNrAlternatives());
 	}
 	
 	@Test

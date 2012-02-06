@@ -24,7 +24,7 @@ import java.util.List;
 
 public class RORModel {
 	
-	protected class PrefPair {
+	public class PrefPair {
 		public PrefPair(int a2, int b2) {
 			a = a2;
 			b = b2;
@@ -33,10 +33,10 @@ public class RORModel {
 		public int b;
 	}	
 
-	protected PerformanceMatrix perfMatrix;
-	protected List<PrefPair> prefPairs = new ArrayList<PrefPair>();
+	private PerformanceMatrix perfMatrix;
+	private List<PrefPair> prefPairs = new ArrayList<PrefPair>();
 
-	protected RORModel(PerformanceMatrix perfMatrix) {
+	public RORModel(PerformanceMatrix perfMatrix) {
 		this.perfMatrix = perfMatrix;
 	}
 

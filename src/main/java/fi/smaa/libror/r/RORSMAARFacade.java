@@ -22,15 +22,17 @@ package fi.smaa.libror.r;
 import org.apache.commons.math.linear.RealMatrix;
 
 import fi.smaa.libror.CardinalPartialValueFunction;
+import fi.smaa.libror.RORModel;
 import fi.smaa.libror.SamplingException;
 import fi.smaa.libror.ValueFunctionSampler;
 import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORSMAA;
 import fi.smaa.libror.RejectionValueFunctionSampler;
 
-public class RORSMAARFacade extends RORRFacade<RORSMAA> {
+public class RORSMAARFacade extends RORRFacade {
 	
 	private static final int NR_ITERS = 10000;
+	private RORSMAA rorsmaa;
 
 	/**
 	 * @param matrix matrix in row-major representation
@@ -38,14 +40,15 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RORSMAARFacade(double[] matrix, int nRows) {
-		super(new RORSMAA(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
+		super(new RORModel(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
 		RejectionValueFunctionSampler sampler = new RejectionValueFunctionSampler(model, NR_ITERS);
-		model.setSampler(sampler);
+		rorsmaa = new RORSMAA(model);
+		rorsmaa.setSampler(sampler);
 	}
 
 	public String compute() {
 		try {
-			model.compute();
+			rorsmaa.compute();
 			return "";
 		} catch (SamplingException e) {
 			return "Error sampling: " + e.getMessage();
@@ -53,25 +56,25 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 	}
 	
 	public double[] getValueFunctionVals(int vfIndex, int partialVfIndex) {
-		CardinalPartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialVfIndex);		
+		CardinalPartialValueFunction vf = rorsmaa.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialVfIndex);		
 		return vf.getVals();
 	}
 	
 	public double[] getValueFunctionEvals(int vfIndex, int partialvfIndex) {
-		CardinalPartialValueFunction vf = model.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialvfIndex);		
+		CardinalPartialValueFunction vf = rorsmaa.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialvfIndex);		
 		return vf.getEvals();
 	}
 	
 	public int getNrValueFunctions() {
-		return model.getSampler().getValueFunctions().length;
+		return rorsmaa.getSampler().getValueFunctions().length;
 	}
 	
 	public int getNrPartialValueFunctions() {
-		return model.getSampler().getValueFunctions()[0].getPartialValueFunctions().size();
+		return rorsmaa.getSampler().getValueFunctions()[0].getPartialValueFunctions().size();
 	}
 	
 	public double evaluate(int vfIndex, double[] point) {
-		return model.getSampler().getValueFunctions()[vfIndex].evaluate(point);
+		return rorsmaa.getSampler().getValueFunctions()[vfIndex].evaluate(point);
 	}
 	
 	/**
@@ -89,23 +92,23 @@ public class RORSMAARFacade extends RORRFacade<RORSMAA> {
 		}
 		RealMatrix pm = model.getPerfMatrix().getMatrix();
 		double[] alt = pm.getRow(alternative);
-		return model.getSampler().getValueFunctions()[vfIndex].evaluate(alt);
+		return rorsmaa.getSampler().getValueFunctions()[vfIndex].evaluate(alt);
 	}
 	
 	public int getMisses() {
-		if (model.getSampler() instanceof RejectionValueFunctionSampler) {
-			ValueFunctionSampler s = (ValueFunctionSampler) model.getSampler();
+		if (rorsmaa.getSampler() instanceof RejectionValueFunctionSampler) {
+			ValueFunctionSampler s = (ValueFunctionSampler) rorsmaa.getSampler();
 			return s.getMisses();
 		}
 		return 0;
 	}
 	
 	public double[][] getRAIs() {
-		return model.getRAIs().getData();
+		return rorsmaa.getRAIs().getData();
 	}
 
 	public double[][] getPOIs() {
-		return model.getPOIs().getData();
+		return rorsmaa.getPOIs().getData();
 	}
 
 }

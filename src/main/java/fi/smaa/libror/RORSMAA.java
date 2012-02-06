@@ -24,14 +24,19 @@ import org.apache.commons.math.linear.RealMatrix;
 
 import fi.smaa.common.ValueRanker;
 
-public class RORSMAA extends RORModel {
+public class RORSMAA {
 
 	private RejectionValueFunctionSampler sampler;
 	private RealMatrix poiMatrix;
 	private RealMatrix raiMatrix;
+	private RORModel model;
 
-	public RORSMAA(PerformanceMatrix perfMatrix) {
-		super(perfMatrix);
+	public RORSMAA(RORModel model) {
+		this.model = model;
+	}
+	
+	public RORModel getModel() {
+		return model;
 	}
 	
 	public void setSampler(RejectionValueFunctionSampler sampler) {
@@ -47,7 +52,7 @@ public class RORSMAA extends RORModel {
 			throw new IllegalStateException("Sampler not set yet");
 		}
 		sampler.sample();
-		int nrAlt = getNrAlternatives();		
+		int nrAlt = model.getNrAlternatives();		
 		double[] evals = new double[nrAlt];
 		int[][] poiHits = new int[nrAlt][nrAlt];
 		int[][] raiHits = new int[nrAlt][nrAlt];
@@ -56,7 +61,7 @@ public class RORSMAA extends RORModel {
 		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
 			// evaluate all alts
 			for (int i=0;i<nrAlt;i++) {
-				evals[i] = vf.evaluate(perfMatrix.getMatrix().getRow(i));
+				evals[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
 			}
 			// update poi hits
 			for (int i=0;i<nrAlt;i++) {
@@ -81,11 +86,6 @@ public class RORSMAA extends RORModel {
 				raiMatrix.setEntry(i, j, (double) raiHits[i][j] / (double)divider);
 			}
 		}
-	}
-	
-	@Override
-	public void addPreference(int a, int b) {
-		super.addPreference(a, b);
 	}
 	
 	/**

@@ -42,8 +42,8 @@ public class UTAGMSSolverTest {
 		perfMatrix.setRow(0, new double[] {1.0, 1.0, 1.0});
 		perfMatrix.setRow(1, new double[] {2.0, 1.0, 1.1});
 		perfMatrix.setRow(2, new double[] {2.0, 0.5, 3.0});
-		solver = new UTAGMSSolver(new PerformanceMatrix(perfMatrix));
-		solver.addPreference(2, 1); // a3 > a2
+		solver = new UTAGMSSolver(new RORModel(new PerformanceMatrix(perfMatrix)));
+		solver.getModel().addPreference(2, 1); // a3 > a2
 	}
 	
 	@Test
@@ -86,8 +86,8 @@ public class UTAGMSSolverTest {
 		// constraints for the monotonicity
 		int cIndex = 1;
 		int cInIndex = 1;
-		for (int i=0;i<solver.getNrCriteria();i++) {
-			for (int j=0;j<solver.getPerfMatrix().getLevels()[i].getDimension()-1;j++) {
+		for (int i=0;i<solver.getModel().getNrCriteria();i++) {
+			for (int j=0;j<solver.getModel().getPerfMatrix().getLevels()[i].getDimension()-1;j++) {
 				LinearConstraint lc = c.get(cIndex);
 				double[] vals = new double[8];
 				vals[cInIndex-1] = 1.0;
@@ -101,13 +101,13 @@ public class UTAGMSSolverTest {
 		}
 		// constraints for first level being 0
 		int offset = 0;
-		for (int i=0;i<solver.getNrCriteria();i++) {
+		for (int i=0;i<solver.getModel().getNrCriteria();i++) {
 			LinearConstraint lc = c.get(cIndex);
 			assertEquals(Relationship.EQ, lc.getRelationship());
 			assertEquals(0.0, lc.getValue(), 0.000001);
 			double[] vals = new double[8];
 			vals[offset] = 1.0;
-			offset+=solver.getPerfMatrix().getLevels()[i].getDimension();
+			offset+=solver.getModel().getPerfMatrix().getLevels()[i].getDimension();
 			assertArrayEquals(vals, lc.getCoefficients().getData(), 0.00001);
 			cIndex++;
 		}
@@ -129,7 +129,7 @@ public class UTAGMSSolverTest {
 		double[][] data = new double[][]{
 				{82,94,80,91},
 				{59,73,72,67}};
-		UTAGMSSolver s = new UTAGMSSolver(new PerformanceMatrix(new Array2DRowRealMatrix(data)));
+		UTAGMSSolver s = new UTAGMSSolver(new RORModel(new PerformanceMatrix(new Array2DRowRealMatrix(data))));
 		s.solve();
 		RealMatrix posRel = s.getPossibleRelation();
 		assertArrayEquals(new double[]{1.0, 1.0}, posRel.getRow(0), 0.001);		

@@ -12,7 +12,7 @@ public class GibbsValueFunctionSamplerTest {
 
 	private GibbsValueFunctionSampler s;
 	private Array2DRowRealMatrix perfMat;
-	private RORSMAA ror;
+	private RORModel ror;
 	private WeightedOrdinalValueFunction spoint;
 	private OrdinalPartialValueFunction vf1;
 	private OrdinalPartialValueFunction vf2;
@@ -27,7 +27,7 @@ public class GibbsValueFunctionSamplerTest {
 				{2,1,2},
 				{1,1,3}};
 		perfMat = new Array2DRowRealMatrix(data);
-		ror = new RORSMAA(new PerformanceMatrix(perfMat));
+		ror = new RORModel(new PerformanceMatrix(perfMat));
 		spoint = new WeightedOrdinalValueFunction();
 		vf1 = new OrdinalPartialValueFunction(2);
 		vf2 = new OrdinalPartialValueFunction(2);
@@ -117,7 +117,7 @@ public class GibbsValueFunctionSamplerTest {
 				{1,1,1},
 				{0,0,0}};
 		perfMat = new Array2DRowRealMatrix(data);
-		ror = new RORSMAA(new PerformanceMatrix(perfMat));
+		ror = new RORModel(new PerformanceMatrix(perfMat));
 		spoint = new WeightedOrdinalValueFunction();
 		vf1 = new OrdinalPartialValueFunction(2);
 		vf2 = new OrdinalPartialValueFunction(2);

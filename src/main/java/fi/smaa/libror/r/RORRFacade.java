@@ -21,11 +21,11 @@ package fi.smaa.libror.r;
 
 import fi.smaa.libror.RORModel;
 
-public class RORRFacade<T extends RORModel> {
+public class RORRFacade {
 
-	protected T model;
+	protected RORModel model;
 
-	protected RORRFacade(T model) {
+	protected RORRFacade(RORModel model) {
 		this.model = model;
 	}
 
