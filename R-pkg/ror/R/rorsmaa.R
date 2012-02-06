@@ -1,6 +1,4 @@
 rorsmaa <- function(performances, preferences, necessary=TRUE) {
-  rel <- matrix(nrow=nrow(performances), ncol=ncol(performances))
-
   ror <- rorsmaa.create(performances)
   if (is.matrix(preferences)) {
     for (i in 1:nrow(preferences)) {
