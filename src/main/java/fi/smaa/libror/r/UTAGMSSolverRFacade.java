@@ -41,11 +41,6 @@ public class UTAGMSSolverRFacade extends RORRFacade {
 		solver.setStrictValueFunctions(strict);
 	}
 	
-	protected UTAGMSSolverRFacade(UTAGMSSolver m) {
-		super(m.getModel());
-		solver = m;
-	}
-
 	public int solve() {
 		try {
 			solver.solve();
