@@ -10,8 +10,7 @@ sample.vfs.gibbs <- function(performances, preferences, nr=10000, thinning=1) {
   }
   gibbs.sample(ror)
 
-  return(gibbs.allValueFunctions(ror, ncol(performances)))
-    
+  return(gibbs.allValueFunctions(ror, ncol(performances)))    
 }
 
 gibbs.allValueFunctions <- function(ror, nVf) {

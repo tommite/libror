@@ -23,8 +23,10 @@
   Multiple Criteria Decision Support. Submitted manuscript.
 }
 \keyword{robust}
-\seealso{rorsmaa,utagms}
+\seealso{rorsmaa,utagms,sample.vfs.gibbs}
 \examples{
+# Set Java VM memory use to 2g not to run out of heap space
+options( java.parameters = "-Xmx2g" )
 library(ror)
 
 performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
@@ -40,4 +42,7 @@ ror <- rorsmaa(performances, preferences)
 print(ror$poi)
 print(ror$rai)
 cat(ror$misses, "misses while generating 10k value functions")
+
+## Sample some value functions
+vfs <- sample.vfs.gibbs(performances, preferences, nr=10, thinning=2)
 }

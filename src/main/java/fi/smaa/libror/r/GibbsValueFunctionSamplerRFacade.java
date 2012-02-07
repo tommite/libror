@@ -33,9 +33,10 @@ public class GibbsValueFunctionSamplerRFacade extends RORRFacade {
 		for (int i=0;i<vfs.length;i++) {
 			WeightedOrdinalValueFunction vf = vfs[i];
 			OrdinalPartialValueFunction pvf = vf.getPartialValueFunctions().get(cIndex);
+			double w = vf.getWeights()[cIndex];
 			double[] vals = pvf.getValues();
 			for (int j=0;j<vals.length;j++) {
-				ret[i][j] = vals[j];
+				ret[i][j] = vals[j] * w;
 			}
 		}
 		return ret;
