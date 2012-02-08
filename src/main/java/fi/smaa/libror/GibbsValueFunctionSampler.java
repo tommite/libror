@@ -104,8 +104,12 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 				}
 			} else { // update characteristic point
 				OrdinalPartialValueFunction vf = currentVF.getPartialValueFunctions().get(curVFind);
+				double oldPoint = vf.getValues()[curPartVFind];
 				double point = samplePoint(curPartVFind, vf);
 				vf.setValue(curPartVFind, point);
+				if (failsRejectCriterion(currentVF)) {
+					vf.setValue(curPartVFind, oldPoint);
+				}
 				store = true;
 			}
 			
