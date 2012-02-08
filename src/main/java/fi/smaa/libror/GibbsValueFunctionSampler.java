@@ -13,6 +13,8 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	private WeightedOrdinalValueFunction[] vfs;
 	private int thinning;
 	private WeightedOrdinalValueFunction startingPoint;
+	private StatusListener listener;
+	private int updateInterval = -1;
 	
 	public GibbsValueFunctionSampler(RORModel model, int count, int thinning, 
 			WeightedOrdinalValueFunction startingPoint) throws InvalidStartingPointException {
@@ -26,6 +28,11 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		startingPoint = generateStartingPoint();
 		init(count, thinning, startingPoint);
 	}	
+	
+	public void setStatusListener(StatusListener l, int updateInterval) {
+		this.listener = l;
+		this.updateInterval = updateInterval;
+	}
 
 	private void checkStartingPoint(WeightedOrdinalValueFunction p) throws InvalidStartingPointException {
 		if (!p.areValidWeights()) {
@@ -78,16 +85,13 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		int curVFind = 0;
 		int curPartVFind = 1; // curPartVF == (amount of part VFs) means to sample the weight
 		// and 0 is always 0.0 value so we don't sample it 
-		
-		int iter = 0;
-		
-		boolean store = true;
-		int index = 1;
 				
 		vfs[0] = currentVF.deepCopy();
+		int iter = 1;
+		int index = 1;
 		
 		while (index < vfs.length) {
-			store = false;
+			boolean store = false;
 			if (curPartVFind == sizPartVF[curVFind]-1) { // update weight
 				// if it's the last one, don't do anything (it's dependent on others as \sum_i w_i=1
 				if (curVFind != (nrPartVF-1)) {
@@ -122,15 +126,16 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 				curVFind = (curVFind + 1) % nrPartVF;
 			}
 			if (store) {
-				iter++;
 				if (iter % thinning == 0) {
 					vfs[index] = currentVF.deepCopy();
+					if (updateInterval > 0 && (index+1) % updateInterval == 0) {
+						listener.update(index+1);
+					}
 					index++;
 				}
+				iter++;
 			}
 		}
-		
-		
 	}
 
 	private boolean failsRejectCriterion(WeightedOrdinalValueFunction vf) {

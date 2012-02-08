@@ -6,6 +6,7 @@ import fi.smaa.libror.OrdinalPartialValueFunction;
 import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORModel;
 import fi.smaa.libror.SamplingException;
+import fi.smaa.libror.StatusListener;
 import fi.smaa.libror.WeightedOrdinalValueFunction;
 
 public class GibbsValueFunctionSamplerRFacade extends RORRFacade {
@@ -14,10 +15,11 @@ public class GibbsValueFunctionSamplerRFacade extends RORRFacade {
 
 	public GibbsValueFunctionSamplerRFacade(double[] matrix, int nRows, int nrFuncs, int thinning) throws InvalidStartingPointException {
 		super(new RORModel(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
-		sampler = new GibbsValueFunctionSampler(this.model, nrFuncs, thinning);				
+		sampler = new GibbsValueFunctionSampler(this.model, nrFuncs, thinning);
 	}
 	
-	public void sample() throws SamplingException {
+	public void sample(int updInterval) throws SamplingException {
+		sampler.setStatusListener(new FacadeStatusListener(), updInterval);
 		sampler.sample();
 	}
 	
@@ -39,7 +41,13 @@ public class GibbsValueFunctionSamplerRFacade extends RORRFacade {
 				ret[i][j] = vals[j] * w;
 			}
 		}
+		
 		return ret;
 	}
 
+	private class FacadeStatusListener implements StatusListener {
+		public void update(int nrItersDone) {
+			System.out.println("Sampled " + nrItersDone + " / " + sampler.getNrValueFunctions());
+		}
+	}
 }

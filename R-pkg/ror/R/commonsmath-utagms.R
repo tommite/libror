@@ -20,14 +20,14 @@ utagms.setStrictValueFunctions <- function(ror, strict) {
 }
 
 utagms.getNecessaryRelation <- function(ror) {
-  rel <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getNecessaryRelation"))
+  rel <- .jcall(ror$model, "[[D", method="getNecessaryRelation", simplify=TRUE)
   rownames(rel) <- ror$rownames
   colnames(rel) <- ror$rownames
   return(rel)
 }
 
 utagms.getPossibleRelation <- function(ror) {
-  rel <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getPossibleRelation"))
+  rel <- .jcall(ror$model, "[[D", method="getPossibleRelation", simplify=TRUE)
   rownames(rel) <- ror$rownames
   colnames(rel) <- ror$rownames
   return(rel)

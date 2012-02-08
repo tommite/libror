@@ -72,7 +72,7 @@ rorsmaa.getMisses <- function(ror) {
 }
 
 rorsmaa.getRAIs <- function(ror) {
-  rai <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getRAIs"))
+  rai <- .jcall(ror$model, "[[D", method="getRAIs", simplify=TRUE)
   rownames(rai) <- ror$rownames
   if (!is.null(ror$rownames)) {
     colnames(rai) <- seq(1, length(ror$rownames))
@@ -81,7 +81,7 @@ rorsmaa.getRAIs <- function(ror) {
 }
 
 rorsmaa.getPOIs <- function(ror) {
-  poi <- .doubleArrayToMatrix(.jcall(ror$model, "[[D", method="getPOIs"))
+  poi <- .jcall(ror$model, "[[D", method="getPOIs", simplify=TRUE)
   rownames(poi) <- ror$rownames
   colnames(poi) <- ror$rownames
   return(poi)

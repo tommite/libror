@@ -1,4 +1,4 @@
-sample.vfs.gibbs <- function(performances, preferences, nr=10000, thinning=1) {
+sample.vfs.gibbs <- function(performances, preferences, nr=10000, thinning=1, updInterval=1000) {
   stopifnot(nr > 0)
   stopifnot(thinning > 0)
   
@@ -8,7 +8,7 @@ sample.vfs.gibbs <- function(performances, preferences, nr=10000, thinning=1) {
       ror.addPreference(ror, preferences[i,1], preferences[i,2])
     }
   }
-  gibbs.sample(ror)
+  gibbs.sample(ror, updInterval)
 
   return(gibbs.allValueFunctions(ror, ncol(performances)))    
 }
@@ -25,18 +25,16 @@ gibbs.create <- function(perfMat, nrVF, thinning) {
 }
 
 
-gibbs.sample <- function(ror) {
-  .jcall(ror$model, "V", method="sample")
+gibbs.sample <- function(ror, upd) {
+  .jcall(ror$model, "V", method="sample", as.integer(upd))
 }
 
 gibbs.getValueFunctionsForCriterion <- function(ror, cIndex) {
-  vfs <- .doubleArrayToMatrix(
-                              .jcall(ror$model,
-                                     "[[D",
-                                     method="getValueFunctionsForCriterion",
-                                     as.integer(cIndex-1))
-                              )
-  return(vfs)
+  .jcall(ror$model,
+         "[[D",
+         method="getValueFunctionsForCriterion",
+         as.integer(cIndex-1),
+         simplify=TRUE)
 }
 
 
