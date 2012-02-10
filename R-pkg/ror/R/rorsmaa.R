@@ -22,40 +22,6 @@ rorsmaa.create <- function(perfMat) {
   list(model=model, rownames=rownames(perfMat), colnames=colnames(perfMat))
 }
 
-rorsmaa.getValueFunctionVals <- function(ror, vfIndex, partialVfIndex) {
-  partialVfIndex = partialVfIndex - 1
-  vfIndex = vfIndex - 1
-  .jcall(ror$model, "[D", method="getValueFunctionVals", as.integer(vfIndex), as.integer(partialVfIndex))
-}
-
-rorsmaa.getValueFunctionEvals <- function(ror, vfIndex, partialVfIndex) {
-  partialVfIndex = partialVfIndex - 1
-  vfIndex = vfIndex - 1
-  .jcall(ror$model, "[D", method="getValueFunctionEvals", as.integer(vfIndex), as.integer(partialVfIndex))
-}
-
-rorsmaa.singleValueFunction <- function(ror, index) {
-  nPartVf <- .jcall(ror$model, "I", method="getNrPartialValueFunctions")
-  v <- c()
-  e <- c()
-  for (i in 1:nPartVf) {
-    vals <- rorsmaa.getValueFunctionVals(ror, index, i)
-    evals <- rorsmaa.getValueFunctionEvals(ror, index, i)
-
-    v <- rbind(v, vals)
-    e <- rbind(e, evals)    
-  }
-  list(vals=v, evals=e)
-}
-
-rorsmaa.allValueFunctions <- function(ror) {
-  nVf <- .jcall(ror$model, "I", method="getNrValueFunctions")
-  nPartVf <- .jcall(ror$model, "I", method="getNrPartialValueFunctions")
-  ret <- list()
-
-  lapply(seq(1, nVf), function(x) {rorsmaa.singleValueFunction(ror, x)})
-}
-
 rorsmaa.compute <- function(ror) {
   rets <- .jcall(ror$model, "S", method="compute")
   return(.jstrVal(rets))

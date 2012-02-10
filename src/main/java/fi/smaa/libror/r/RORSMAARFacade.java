@@ -49,15 +49,7 @@ public class RORSMAARFacade extends RORRFacade {
 			return "Error sampling: " + e.getMessage();
 		}
 	}
-		
-	public int getNrValueFunctions() {
-		return rorsmaa.getSampler().getValueFunctions().length;
-	}
-	
-	public int getNrPartialValueFunctions() {
-		return rorsmaa.getSampler().getValueFunctions()[0].getPartialValueFunctions().size();
-	}
-		
+				
 	/**
 	 * 
 	 * @param vfIndex PRECOND: >= 0
