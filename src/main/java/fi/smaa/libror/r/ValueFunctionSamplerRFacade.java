@@ -13,24 +13,36 @@ import fi.smaa.libror.StatusListener;
 public class ValueFunctionSamplerRFacade extends RORRFacade {
 
 	private MCValueFunctionSampler sampler;
+	private int nrFuncs;
+	private int thinning;
+	private int samplerId;
 
 	public ValueFunctionSamplerRFacade(double[] matrix, int nRows, int nrFuncs, int thinning, int samplerId) throws SamplingException {
 		super(new RORModel(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
-		if (samplerId == 1) {
-			sampler = new GibbsValueFunctionSampler(this.model, nrFuncs, thinning);
-		} else if (samplerId == 2) {
-			sampler = new RejectionValueFunctionSampler(this.model, nrFuncs);
-		} else {
+		if (samplerId != 1 && samplerId != 2) {
 			throw new IllegalArgumentException("Invalid sampler id " + samplerId);
 		}
+		this.nrFuncs = nrFuncs;
+		this.thinning = thinning;
+		this.samplerId = samplerId;
 	}
 	
 	public void sample(int updInterval) throws SamplingException {
+		if (sampler == null) {
+			if (samplerId == 1) {
+				sampler = new GibbsValueFunctionSampler(this.model, nrFuncs, thinning);
+			} else { // it's 2
+				sampler = new RejectionValueFunctionSampler(this.model, nrFuncs);
+			}
+		}
 		sampler.setStatusListener(new FacadeStatusListener(), updInterval);
 		sampler.sample();
 	}
 	
 	public int getMisses() {
+		if (sampler == null) {
+			throw new IllegalStateException("sample() not called");
+		}
 		return sampler.getMisses();
 	}
 	

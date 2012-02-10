@@ -99,7 +99,6 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 	}
 
 	public void doSample() throws SamplingException {
-		misses = 0;
 		FullValueFunction currentVF = startingPoint.deepCopy();
 			
 		int nrPartVF = currentVF.getPartialValueFunctions().size();
@@ -126,6 +125,7 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 					setLastWeight(currentVF); // set last weight so that they sum to 1.0
 					if (!acceptance.check(currentVF)) {
 						currentVF.setWeights(oldWeights);
+						misses++;
 					}
 					store = true;
 				}
@@ -136,6 +136,7 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 				vf.setValue(curPartVFind, point);
 				if (!acceptance.check(currentVF)) {
 					vf.setValue(curPartVFind, oldPoint);
+					misses++;
 				}
 				store = true;
 			}
