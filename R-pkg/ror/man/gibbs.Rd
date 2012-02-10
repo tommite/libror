@@ -6,7 +6,8 @@
   The current version assumes ascending preferences,
   i.e. higher criterion evaluation means higher preferability (=better).
 }
-\usage{sample.vfs.gibbs(performances, preferences, nr=10000, thinning=1)}
+\usage{sample.vfs.gibbs(performances, preferences, nr=10000, thinning=1,
+updInterval=1000)}
 \arguments{
 \item{performances}{m x n performance matrix with m alternatives
 and n criteria}
@@ -17,7 +18,7 @@ to preferences[k,2]}
 \item{nr}{The number of value functions to sample}
 \item{thinning}{The thinning factor to use}
 \item{updInterval}{Update interval for printing out current
-  iteration. < 1 = no information will be printed out}
+  iteration. 0 = no information will be printed out}
 }
 \value{A list where element [[i]] are the value functions for the i'th
   criterion, one function per row}
