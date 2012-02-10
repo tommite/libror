@@ -7,17 +7,17 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-public class WeightedOrdinalValueFunctionTest {
+public class FullValueFunctionTest {
 
-	private OrdinalPartialValueFunction vf1;
-	private OrdinalPartialValueFunction vf2;
-	private WeightedOrdinalValueFunction wf;
+	private PartialValueFunction vf1;
+	private PartialValueFunction vf2;
+	private FullValueFunction wf;
 
 	@Before
 	public void setUp() {
-		vf1 = new OrdinalPartialValueFunction(3);
-		vf2 = new OrdinalPartialValueFunction(2);
-		wf = new WeightedOrdinalValueFunction();
+		vf1 = new PartialValueFunction(3);
+		vf2 = new PartialValueFunction(2);
+		wf = new FullValueFunction();
 		wf.addValueFunction(vf1);
 		wf.addValueFunction(vf2);
 	}
@@ -41,7 +41,7 @@ public class WeightedOrdinalValueFunctionTest {
 	
 	@Test
 	public void testDeepCopy() {
-		WeightedOrdinalValueFunction nf = wf.deepCopy();
+		FullValueFunction nf = wf.deepCopy();
 		assertTrue(Arrays.equals(nf.getWeights(), wf.getWeights()));
 		assertEquals(nf.getPartialValueFunctions().size(), wf.getPartialValueFunctions().size());
 	}
@@ -53,5 +53,7 @@ public class WeightedOrdinalValueFunctionTest {
 
 		int[] inds = new int[] {2, 0};
 		assertEquals(0.2, wf.evaluate(inds), 0.00001);
+		inds = new int[] {0, 1};
+		assertEquals(0.8, wf.evaluate(inds), 0.00001);
 	}
 }

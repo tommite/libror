@@ -7,14 +7,14 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-public class OrdinalPartialValueFunctionTest {
+public class PartialValueFunctionTest {
 	
-	private OrdinalPartialValueFunction f;
+	private PartialValueFunction f;
 
 
 	@Before
 	public void setUp() {
-		f = new OrdinalPartialValueFunction(3);
+		f = new PartialValueFunction(3);
 	}
 	
 
@@ -32,7 +32,16 @@ public class OrdinalPartialValueFunctionTest {
 	@Test
 	public void testDeepCopy() {
 		f.setValue(1, 0.8);
-		OrdinalPartialValueFunction newf = f.deepCopy();
+		PartialValueFunction newf = f.deepCopy();
 		assertTrue(Arrays.equals(newf.getValues(), f.getValues()));
+	}
+	
+	@Test
+	public void testEquals() {
+		f.setValue(1, 0.5);
+		PartialValueFunction f2 = new PartialValueFunction(3);
+		assertFalse(f.equals(f2));
+		f2.setValue(1, 0.5);
+		assertEquals(f, f2);
 	}
 }

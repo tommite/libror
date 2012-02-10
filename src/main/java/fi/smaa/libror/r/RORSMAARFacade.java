@@ -19,9 +19,6 @@
 
 package fi.smaa.libror.r;
 
-import org.apache.commons.math.linear.RealMatrix;
-
-import fi.smaa.libror.CardinalPartialValueFunction;
 import fi.smaa.libror.PerformanceMatrix;
 import fi.smaa.libror.RORModel;
 import fi.smaa.libror.RORSMAA;
@@ -41,8 +38,7 @@ public class RORSMAARFacade extends RORRFacade {
 	public RORSMAARFacade(double[] matrix, int nRows) {
 		super(new RORModel(new PerformanceMatrix(RHelper.rArrayMatrixToRealMatrix(matrix, nRows))));
 		RejectionValueFunctionSampler sampler = new RejectionValueFunctionSampler(model, NR_ITERS);
-		rorsmaa = new RORSMAA(model);
-		rorsmaa.setSampler(sampler);
+		rorsmaa = new RORSMAA(model, sampler);
 	}
 
 	public String compute() {
@@ -53,17 +49,7 @@ public class RORSMAARFacade extends RORRFacade {
 			return "Error sampling: " + e.getMessage();
 		}
 	}
-	
-	public double[] getValueFunctionVals(int vfIndex, int partialVfIndex) {
-		CardinalPartialValueFunction vf = rorsmaa.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialVfIndex);		
-		return vf.getVals();
-	}
-	
-	public double[] getValueFunctionEvals(int vfIndex, int partialvfIndex) {
-		CardinalPartialValueFunction vf = rorsmaa.getSampler().getValueFunctions()[vfIndex].getPartialValueFunctions().get(partialvfIndex);		
-		return vf.getEvals();
-	}
-	
+		
 	public int getNrValueFunctions() {
 		return rorsmaa.getSampler().getValueFunctions().length;
 	}
@@ -71,11 +57,7 @@ public class RORSMAARFacade extends RORRFacade {
 	public int getNrPartialValueFunctions() {
 		return rorsmaa.getSampler().getValueFunctions()[0].getPartialValueFunctions().size();
 	}
-	
-	public double evaluate(int vfIndex, double[] point) {
-		return rorsmaa.getSampler().getValueFunctions()[vfIndex].evaluate(point);
-	}
-	
+		
 	/**
 	 * 
 	 * @param vfIndex PRECOND: >= 0
@@ -89,17 +71,11 @@ public class RORSMAARFacade extends RORRFacade {
 		if (vfIndex < 0) {
 			throw new IllegalArgumentException("vfIndex < 0");
 		}
-		RealMatrix pm = model.getPerfMatrix().getMatrix();
-		double[] alt = pm.getRow(alternative);
-		return rorsmaa.getSampler().getValueFunctions()[vfIndex].evaluate(alt);
+		return rorsmaa.getSampler().getValueFunctions()[vfIndex].evaluate(model.getPerfMatrix().getLevelIndices(alternative));
 	}
 	
 	public int getMisses() {
-		if (rorsmaa.getSampler() instanceof RejectionValueFunctionSampler) {
-			RejectionValueFunctionSampler s = rorsmaa.getSampler();
-			return s.getMisses();
-		}
-		return 0;
+		return rorsmaa.getSampler().getMisses();
 	}
 	
 	public double[][] getRAIs() {

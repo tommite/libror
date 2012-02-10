@@ -26,59 +26,37 @@ import fi.smaa.common.ValueRanker;
 
 public class RORSMAA {
 
-	private RejectionValueFunctionSampler sampler;
+	private MCValueFunctionSampler sampler;
 	private RealMatrix poiMatrix;
 	private RealMatrix raiMatrix;
 	private RORModel model;
 
-	public RORSMAA(RORModel model) {
+	public RORSMAA(RORModel model, MCValueFunctionSampler sampler) {
 		this.model = model;
+		this.sampler = sampler;
 	}
 	
 	public RORModel getModel() {
 		return model;
 	}
-	
-	public void setSampler(RejectionValueFunctionSampler sampler) {
-		this.sampler = sampler;
-	}
-	
-	public RejectionValueFunctionSampler getSampler() {
+		
+	public MCValueFunctionSampler getSampler() {
 		return sampler;
 	}
 	
 	public void compute() throws SamplingException {
-		if (sampler == null) {
-			throw new IllegalStateException("Sampler not set yet");
-		}
-		sampler.misses = 0;
-		sampler.misses = 0;
-		for (int i1=0;i1<sampler.vfs.length;i1++) {
-			int currentTry = 0;
-			while (currentTry < sampler.maxTries) {
-				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
-				if (sampler.isHit(vf1)) {
-					sampler.vfs[i1] = vf1;
-					break;
-				} else {
-					sampler.misses++;
-				}
-				currentTry++;
-			}
-			if (currentTry == sampler.maxTries) {
-				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
-			}
-		}
 		int nrAlt = model.getNrAlternatives();		
 		double[] evals = new double[nrAlt];
 		int[][] poiHits = new int[nrAlt][nrAlt];
 		int[][] raiHits = new int[nrAlt][nrAlt];
 		int[] ranks = new int[nrAlt];
+		
+		sampler.sample();
 
-		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
+		for (FullValueFunction vf : sampler.getValueFunctions()) {
 			// evaluate all alts
 			for (int i=0;i<nrAlt;i++) {
-				evals[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
+				evals[i] = vf.evaluate(model.getPerfMatrix().getLevelIndices(i));
 			}
 			// update poi hits
 			for (int i=0;i<nrAlt;i++) {

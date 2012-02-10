@@ -30,48 +30,24 @@ import org.junit.Test;
 public class RejectionValueFunctionSamplerTest {
 
 	private RejectionValueFunctionSampler sampler;
+	private RORModel model;
 
 	@Before
 	public void setUp() {
-		int rows = 3;
+		int rows = 2;
 		int cols = 3;
 		RealMatrix p = new Array2DRowRealMatrix(rows, cols);
 		p.setRow(0, new double[] {1.0, 2.0, 3.0});
 		p.setRow(1, new double[] {1.0, 3.0, 4.0});
-		p.setRow(2, new double[] {2.0, -1.0, 3.0});
-		sampler = new RejectionValueFunctionSampler(new RORModel(new PerformanceMatrix(p)), 5);
+		model = new RORModel(new PerformanceMatrix(p));
+		sampler = new RejectionValueFunctionSampler(model, 5);
 	}
 	
 	@Test
-	public void testMonotonousEvals() throws SamplingException {
-		sampler.misses = 0;
-		sampler.misses = 0;
-		for (int i=0;i<sampler.vfs.length;i++) {
-			int currentTry = 0;
-			while (currentTry < sampler.maxTries) {
-				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
-				if (sampler.isHit(vf1)) {
-					sampler.vfs[i] = vf1;
-					break;
-				} else {
-					sampler.misses++;
-				}
-				currentTry++;
-			}
-			if (currentTry == sampler.maxTries) {
-				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
-			}
-		}
-		for (FullCardinalValueFunction fvf : sampler.getValueFunctions()) {
-			for (CardinalPartialValueFunction vf : fvf.getPartialValueFunctions()) {
-				double[] evals = vf.getEvals();
-				double prevVal = -1.0;
-				for (double eval : evals) {
-					assertTrue(prevVal <= eval);
-					prevVal = eval;
-				}
-			}
-		}
+	public void testGetMaxIters() {
+		assertEquals(10000000, sampler.getMaxIters());
+		sampler = new RejectionValueFunctionSampler(model, 5, 12);
+		assertEquals(12, sampler.getMaxIters());
 	}
 	
 	@Test
@@ -80,32 +56,29 @@ public class RejectionValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testValueFunctionMaxsSumToUnity() throws SamplingException {
-		sampler.misses = 0;
-		sampler.misses = 0;
-		for (int i=0;i<sampler.vfs.length;i++) {
-			int currentTry = 0;
-			while (currentTry < sampler.maxTries) {
-				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
-				if (sampler.isHit(vf1)) {
-					sampler.vfs[i] = vf1;
-					break;
-				} else {
-					sampler.misses++;
-				}
-				currentTry++;
-			}
-			if (currentTry == sampler.maxTries) {
-				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
-			}
+	public void testSampleFunctions() throws SamplingException {
+		int rows = 2;
+		int cols = 2;
+		RealMatrix p = new Array2DRowRealMatrix(rows, cols);
+		p.setRow(0, new double[] {1.0, 2.0});
+		p.setRow(1, new double[] {2.0, 1.0});
+		model = new RORModel(new PerformanceMatrix(p));
+		model.addPreference(0, 1); // a0 > a1
+		sampler = new RejectionValueFunctionSampler(model, 2);
+		sampler.sample();
+		for (FullValueFunction vf : sampler.getValueFunctions()) {
+			assertEquals(2, vf.getPartialValueFunctions().size());
+			assertEquals(new PartialValueFunction(2), vf.getPartialValueFunctions().get(0));
+			assertEquals(new PartialValueFunction(2), vf.getPartialValueFunctions().get(1));
+			double[] w = vf.getWeights();
+			assertTrue(w[0] < w[1]);
 		}
-		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
-			double sum = 0.0;
-			for (CardinalPartialValueFunction v : vf.getPartialValueFunctions()) {
-				double[] ev = v.getEvals();
-				sum += ev[ev.length-1];
-			}
-			assertEquals(1.0, sum, 0.0000001);
-		}
+	}
+	
+	@Test(expected=SamplingException.class)
+	public void testSampleInfeasibleFunctions() throws SamplingException {
+		model.addPreference(0, 1);
+		sampler = new RejectionValueFunctionSampler(model, 1, 100);
+		sampler.sample();
 	}
 }

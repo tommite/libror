@@ -1,15 +1,17 @@
 package fi.smaa.libror;
 
-public class OrdinalPartialValueFunction implements DeepCopiable<OrdinalPartialValueFunction> {
+import java.util.Arrays;
+
+public class PartialValueFunction implements DeepCopiable<PartialValueFunction> {
 
 	private double[] values;
 
 	/**
 	 * 
-	 * @param nrLevels >= 2
+	 * @param nrLevels >= 1
 	 */
-	public OrdinalPartialValueFunction(int nrLevels) {
-		if (nrLevels < 2) {
+	public PartialValueFunction(int nrLevels) {
+		if (nrLevels < 1) {
 			throw new IllegalArgumentException("PRECOND violation");
 		}
 		values = new double[nrLevels];
@@ -32,11 +34,25 @@ public class OrdinalPartialValueFunction implements DeepCopiable<OrdinalPartialV
 		values[index] = value;
 	}
 
-	public OrdinalPartialValueFunction deepCopy() {
-		OrdinalPartialValueFunction n = new OrdinalPartialValueFunction(values.length);
+	public PartialValueFunction deepCopy() {
+		PartialValueFunction n = new PartialValueFunction(values.length);
 		for (int i=0;i<values.length;i++) {
 			n.values[i] = values[i];
 		}
 		return n;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof PartialValueFunction) {
+			PartialValueFunction p2 = (PartialValueFunction) other;
+			return Arrays.equals(values, p2.values);
+		}
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(values);
 	}
 }

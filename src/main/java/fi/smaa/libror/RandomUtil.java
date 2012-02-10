@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.apache.commons.math.random.MersenneTwister;
 
 public class RandomUtil {
+	
 	private static MersenneTwister random = new MersenneTwister(0x667);
 		
 	/**
@@ -64,7 +65,7 @@ public class RandomUtil {
 			double t = dest[i];
 			dest[i] = t - last;
 			last = t;
-		}		
+		}
 	}
 
 	/**
@@ -85,6 +86,13 @@ public class RandomUtil {
 	 */
 	public static void createSumToOneSorted(double[] dest) throws NullPointerException {
 		createSumToOneRand(dest);
+		Arrays.sort(dest);
+	}
+	
+	public static void createSorted(double[] dest) {
+		for (int i=0;i<dest.length;i++) {
+			dest[i] = createUnif01();
+		}
 		Arrays.sort(dest);
 	}
 }

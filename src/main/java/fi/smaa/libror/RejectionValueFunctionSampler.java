@@ -19,24 +19,15 @@
 
 package fi.smaa.libror;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.math.linear.RealVector;
-import org.apache.commons.math.random.MersenneTwister;
-
-import fi.smaa.libror.RORModel.PrefPair;
 
 
-public class RejectionValueFunctionSampler {
+public class RejectionValueFunctionSampler extends MCValueFunctionSampler {
 
-	protected WeightedOrdinalValueFunction[] vfs;
-	private int maxTries = Integer.MAX_VALUE;
-	protected int misses;
-	protected double[] w;
-	protected MersenneTwister rng = new MersenneTwister(0x667);
-	protected RORModel model;
+	private int maxTries = 10000000;
+	protected int misses = 0;
 
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
@@ -45,83 +36,61 @@ public class RejectionValueFunctionSampler {
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RejectionValueFunctionSampler(RORModel model, int count) {
-		this.model = model;
-		misses = 0;
-		w = new double[model.getNrCriteria()];
-		vfs = new WeightedOrdinalValueFunction[count];
+		super(model, count);
 	}
 	
 	public RejectionValueFunctionSampler(RORModel model, int count, int maxIters) {
-		this(model, count);
+		super(model, count);
 		maxTries = maxIters;
 	}
 	
-	public WeightedOrdinalValueFunction[] getValueFunctions() {
+	public int getMaxIters() {
+		return maxTries;
+	}
+	
+	public FullValueFunction[] getValueFunctions() {
 		if (vfs == null) {
 			throw new IllegalStateException("sample() not called");
 		}
 		return vfs;
 	}
-
 		
-	private WeightedOrdinalValueFunction  sampleValueFunction() {
-		WeightedOrdinalValueFunction vf = new WeightedOrdinalValueFunction();
-			
-		for (int i=0;i<model.getNrCriteria();i++) {
-			RealVector lvls = model.getPerfMatrix().getLevels()[i];
-			OrdinalPartialValueFunction pvf = new OrdinalPartialValueFunction(lvls.getDimension());
-			vf.addValueFunction(pvf);
-			double[] vals = model.getPerfMatrix().getLevels()[i].getData();
-			partVals.add(vals);
-			partEvals.add(createPartialValues(vals.length));	
-		}
+	private FullValueFunction sampleValueFunction() throws SamplingException {			
+		int curIter = 1;
 		
-		
-		sampleWeights();
-		
-		// scale the partial value functions with weights
-		for (int i=0;i<model.getNrCriteria();i++) {
-			double[] evals = partEvals.get(i);
-			for (int j=0;j<evals.length;j++) {
-				evals[j] *= w[i];
+		do {
+			FullValueFunction vf = new FullValueFunction();
+			for (int i=0;i<model.getNrCriteria();i++) {
+				RealVector lvls = model.getPerfMatrix().getLevels()[i];
+				PartialValueFunction pvf = new PartialValueFunction(lvls.getDimension());
+				vf.addValueFunction(pvf);
+				sampleRandomPartialVF(pvf);
 			}
-			vf.addValueFunction(new CardinalPartialValueFunction(partVals.get(i), evals));
-		}
-		
-		return vf;
+
+			double[] w = new double[model.getNrCriteria()];
+			RandomUtil.createSumToOneRand(w);
+			vf.setWeights(w);
+			if (acceptance.check(vf)) {
+				return vf;
+			}
+			misses++;
+			curIter++;
+		} while (curIter <= maxTries);
+		throw new SamplingException("Cannot sample a VF within " + maxTries + " iterations");
 	}
 	
-	private boolean isHit(WeightedOrdinalValueFunction vf) {
-		double[] values = new double[model.getNrAlternatives()];	
-		for (int i=0;i<values.length;i++) {
-			values[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
-		}
-		
-		for (PrefPair p : model.getPrefPairs()) {
-			if (values[p.a]< values[p.b]) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-
-	private double[] createPartialValues(int length) {
-		double[] vals = new double[length];
-		vals[0] = 0.0;
+	private void sampleRandomPartialVF(PartialValueFunction pvf) {
+		double[] vals = pvf.getValues();
 		for (int i=1;i<vals.length-1;i++) {
-			vals[i] = rng.nextDouble();
+			vals[i] = RandomUtil.createUnif01();
 		}
-		vals[vals.length-1] = 1.0;
 		Arrays.sort(vals);
-		return vals;
 	}
 
-	public int getMisses() {
-		return misses;
+	public void doSample() throws SamplingException {
+		for (int i=0;i<vfs.length;i++) {
+			vfs[i] = sampleValueFunction();
+		}
 	}
 
-	protected void sampleWeights() {
-		RandomUtil.createSumToOneRand(w);
-	}
 }
