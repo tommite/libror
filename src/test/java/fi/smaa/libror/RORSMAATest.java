@@ -20,12 +20,13 @@
 package fi.smaa.libror;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 public class RORSMAATest {
@@ -66,6 +67,13 @@ public class RORSMAATest {
 	}
 	
 	@Test
+	public void testValueFunctionSamplingMisses() throws SamplingException {
+		RejectionValueFunctionSampler s = new RejectionValueFunctionSampler(ror.getModel(), 100);
+		s.sample();
+		assertTrue(s.getMisses()>0);
+	}
+		
+	@Test
 	public void testGetNrAltsCrits() {
 		assertEquals(4, ror.getModel().getNrCriteria());
 		assertEquals(20, ror.getModel().getNrAlternatives());
@@ -84,5 +92,4 @@ public class RORSMAATest {
 		assertArrayEquals(new double[]{0.7811, 0.2188, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, rai.getRow(0), 0.02);		
 	}
-	
 }

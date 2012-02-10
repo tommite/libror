@@ -27,7 +27,6 @@ import org.apache.commons.math.linear.RealVector;
 public class RejectionValueFunctionSampler extends MCValueFunctionSampler {
 
 	private int maxTries = 10000000;
-	protected int misses = 0;
 
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
