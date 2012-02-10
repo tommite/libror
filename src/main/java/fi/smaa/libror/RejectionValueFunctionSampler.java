@@ -23,13 +23,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math.linear.RealVector;
+import org.apache.commons.math.random.MersenneTwister;
+
 import fi.smaa.libror.RORModel.PrefPair;
 
 
-public class RejectionValueFunctionSampler extends ValueFunctionSampler {
+public class RejectionValueFunctionSampler {
 
-	protected FullCardinalValueFunction[] vfs;
+	protected WeightedOrdinalValueFunction[] vfs;
 	private int maxTries = Integer.MAX_VALUE;
+	protected int misses;
+	protected double[] w;
+	protected MersenneTwister rng = new MersenneTwister(0x667);
+	protected RORModel model;
 
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
@@ -38,17 +45,18 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RejectionValueFunctionSampler(RORModel model, int count) {
-		super(model);
-		vfs = new FullCardinalValueFunction[count];
+		this.model = model;
+		misses = 0;
+		w = new double[model.getNrCriteria()];
+		vfs = new WeightedOrdinalValueFunction[count];
 	}
 	
 	public RejectionValueFunctionSampler(RORModel model, int count, int maxIters) {
-		super(model);
-		vfs = new FullCardinalValueFunction[count];
+		this(model, count);
 		maxTries = maxIters;
 	}
 	
-	public FullCardinalValueFunction[] getValueFunctions() {
+	public WeightedOrdinalValueFunction[] getValueFunctions() {
 		if (vfs == null) {
 			throw new IllegalStateException("sample() not called");
 		}
@@ -56,34 +64,13 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 	}
 
 		
-	public void doSample() throws SamplingException {
-		misses = 0;
-		for (int i=0;i<vfs.length;i++) {
-			int currentTry = 0;
-			while (currentTry < maxTries) {
-				FullCardinalValueFunction vf = sampleValueFunction();
-				if (isHit(vf)) {
-					vfs[i] = vf;
-					break;
-				} else {
-					misses++;
-				}
-				currentTry++;
-			}
-			if (currentTry == maxTries) {
-				throw new SamplingException("No sample found within " + maxTries + " rejection iterations");
-			}
-		}
-	}
-
-	
-	private FullCardinalValueFunction  sampleValueFunction() {
-		FullCardinalValueFunction vf = new FullCardinalValueFunction();
-		
-		List<double[]> partVals = new ArrayList<double[]>();		
-		List<double[]> partEvals = new ArrayList<double[]>();
-		
+	private WeightedOrdinalValueFunction  sampleValueFunction() {
+		WeightedOrdinalValueFunction vf = new WeightedOrdinalValueFunction();
+			
 		for (int i=0;i<model.getNrCriteria();i++) {
+			RealVector lvls = model.getPerfMatrix().getLevels()[i];
+			OrdinalPartialValueFunction pvf = new OrdinalPartialValueFunction(lvls.getDimension());
+			vf.addValueFunction(pvf);
 			double[] vals = model.getPerfMatrix().getLevels()[i].getData();
 			partVals.add(vals);
 			partEvals.add(createPartialValues(vals.length));	
@@ -104,7 +91,7 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 		return vf;
 	}
 	
-	private boolean isHit(FullCardinalValueFunction vf) {
+	private boolean isHit(WeightedOrdinalValueFunction vf) {
 		double[] values = new double[model.getNrAlternatives()];	
 		for (int i=0;i<values.length;i++) {
 			values[i] = vf.evaluate(model.getPerfMatrix().getMatrix().getRow(i));
@@ -128,5 +115,13 @@ public class RejectionValueFunctionSampler extends ValueFunctionSampler {
 		vals[vals.length-1] = 1.0;
 		Arrays.sort(vals);
 		return vals;
+	}
+
+	public int getMisses() {
+		return misses;
+	}
+
+	protected void sampleWeights() {
+		RandomUtil.createSumToOneRand(w);
 	}
 }

@@ -44,7 +44,24 @@ public class RejectionValueFunctionSamplerTest {
 	
 	@Test
 	public void testMonotonousEvals() throws SamplingException {
-		sampler.sample();
+		sampler.misses = 0;
+		sampler.misses = 0;
+		for (int i=0;i<sampler.vfs.length;i++) {
+			int currentTry = 0;
+			while (currentTry < sampler.maxTries) {
+				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
+				if (sampler.isHit(vf1)) {
+					sampler.vfs[i] = vf1;
+					break;
+				} else {
+					sampler.misses++;
+				}
+				currentTry++;
+			}
+			if (currentTry == sampler.maxTries) {
+				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
+			}
+		}
 		for (FullCardinalValueFunction fvf : sampler.getValueFunctions()) {
 			for (CardinalPartialValueFunction vf : fvf.getPartialValueFunctions()) {
 				double[] evals = vf.getEvals();
@@ -64,7 +81,24 @@ public class RejectionValueFunctionSamplerTest {
 	
 	@Test
 	public void testValueFunctionMaxsSumToUnity() throws SamplingException {
-		sampler.sample();
+		sampler.misses = 0;
+		sampler.misses = 0;
+		for (int i=0;i<sampler.vfs.length;i++) {
+			int currentTry = 0;
+			while (currentTry < sampler.maxTries) {
+				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
+				if (sampler.isHit(vf1)) {
+					sampler.vfs[i] = vf1;
+					break;
+				} else {
+					sampler.misses++;
+				}
+				currentTry++;
+			}
+			if (currentTry == sampler.maxTries) {
+				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
+			}
+		}
 		for (FullCardinalValueFunction vf : sampler.getValueFunctions()) {
 			double sum = 0.0;
 			for (CardinalPartialValueFunction v : vf.getPartialValueFunctions()) {

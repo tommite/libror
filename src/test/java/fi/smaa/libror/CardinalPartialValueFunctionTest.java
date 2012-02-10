@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import fi.smaa.libror.CardinalPartialValueFunction;
 
-public class PartialValueFunctionTest {
+public class CardinalPartialValueFunctionTest {
 	
 	private double[] vals = new double[] {1.0, 4.0, 5.0};
 	private double[] evals = new double[] {0.0, 0.5, 1.0};

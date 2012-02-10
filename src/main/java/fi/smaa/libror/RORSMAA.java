@@ -51,7 +51,24 @@ public class RORSMAA {
 		if (sampler == null) {
 			throw new IllegalStateException("Sampler not set yet");
 		}
-		sampler.sample();
+		sampler.misses = 0;
+		sampler.misses = 0;
+		for (int i1=0;i1<sampler.vfs.length;i1++) {
+			int currentTry = 0;
+			while (currentTry < sampler.maxTries) {
+				WeightedOrdinalValueFunction vf1 = sampler.sampleValueFunction();
+				if (sampler.isHit(vf1)) {
+					sampler.vfs[i1] = vf1;
+					break;
+				} else {
+					sampler.misses++;
+				}
+				currentTry++;
+			}
+			if (currentTry == sampler.maxTries) {
+				throw new SamplingException("No sample found within " + sampler.maxTries + " rejection iterations");
+			}
+		}
 		int nrAlt = model.getNrAlternatives();		
 		double[] evals = new double[nrAlt];
 		int[][] poiHits = new int[nrAlt][nrAlt];

@@ -22,12 +22,11 @@ package fi.smaa.libror.r;
 import org.apache.commons.math.linear.RealMatrix;
 
 import fi.smaa.libror.CardinalPartialValueFunction;
-import fi.smaa.libror.RORModel;
-import fi.smaa.libror.SamplingException;
-import fi.smaa.libror.ValueFunctionSampler;
 import fi.smaa.libror.PerformanceMatrix;
+import fi.smaa.libror.RORModel;
 import fi.smaa.libror.RORSMAA;
 import fi.smaa.libror.RejectionValueFunctionSampler;
+import fi.smaa.libror.SamplingException;
 
 public class RORSMAARFacade extends RORRFacade {
 	
@@ -97,7 +96,7 @@ public class RORSMAARFacade extends RORRFacade {
 	
 	public int getMisses() {
 		if (rorsmaa.getSampler() instanceof RejectionValueFunctionSampler) {
-			ValueFunctionSampler s = (ValueFunctionSampler) rorsmaa.getSampler();
+			RejectionValueFunctionSampler s = rorsmaa.getSampler();
 			return s.getMisses();
 		}
 		return 0;

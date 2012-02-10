@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math.linear.RealVector;
+import org.apache.commons.math.random.MersenneTwister;
 
 import fi.smaa.libror.RORModel.PrefPair;
 
-public class GibbsValueFunctionSampler extends ValueFunctionSampler {
+public class GibbsValueFunctionSampler implements ValueFunctionSampler {
 	
 	private static final int MAX_STARTINGPOINT_ITERS = 10000;
 	private WeightedOrdinalValueFunction[] vfs;
@@ -15,19 +16,34 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 	private WeightedOrdinalValueFunction startingPoint;
 	private StatusListener listener;
 	private int updateInterval = -1;
+	protected int misses;
+	protected double[] w;
+	protected MersenneTwister rng = new MersenneTwister(0x667);
+	protected RORModel model;
 	
-	public GibbsValueFunctionSampler(RORModel model, int count, int thinning, 
-			WeightedOrdinalValueFunction startingPoint) throws InvalidStartingPointException {
-		super(model);
+	public GibbsValueFunctionSampler(RORModel model, int count, int thinning, WeightedOrdinalValueFunction startingPoint)
+	throws InvalidStartingPointException {
 		checkStartingPoint(startingPoint);
-		init(count, thinning, startingPoint);
+		init(model, count, thinning, startingPoint);
 	}
 	
 	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) throws InvalidStartingPointException {
-		super(model);
 		startingPoint = generateStartingPoint();
-		init(count, thinning, startingPoint);
+		init(model, count, thinning, startingPoint);
 	}	
+	
+	private void init(RORModel model, int count, int thinning, WeightedOrdinalValueFunction startingPoint) {
+		if (count < 1) {
+			throw new IllegalArgumentException("PRECOND violated: count < 1");
+		}
+		if (thinning < 1) {
+			throw new IllegalArgumentException("PRECOND violated: thinning < 1");
+		}
+		w = new double[model.getNrCriteria()];
+		this.startingPoint = startingPoint;
+		vfs = new WeightedOrdinalValueFunction[count];
+		this.thinning = thinning;
+	}
 	
 	public void setStatusListener(StatusListener l, int updateInterval) {
 		this.listener = l;
@@ -49,19 +65,6 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 			}
 		}
 	}
-
-	private void init(int count, int thinning, WeightedOrdinalValueFunction startingPoint) {
-		if (count < 1) {
-			throw new IllegalArgumentException("PRECOND violated: count < 1");
-		}
-		if (thinning < 1) {
-			throw new IllegalArgumentException("PRECOND violated: thinning < 1");
-		}
-
-		this.startingPoint = startingPoint;
-		vfs = new WeightedOrdinalValueFunction[count];
-		this.thinning = thinning;
-	}
 	
 	public WeightedOrdinalValueFunction[] getValueFunctions() {
 		return vfs;
@@ -75,8 +78,111 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		return vfs.length;
 	}
 
-	@Override
-	public void doSample() {
+	private boolean failsRejectCriterion(WeightedOrdinalValueFunction vf) {
+		PerformanceMatrix pm = model.getPerfMatrix();		
+		for (PrefPair pref : model.getPrefPairs()) {
+			int[] alevels = pm.getLevelIndices(pref.a);
+			int[] blevels = pm.getLevelIndices(pref.b);
+			if (vf.evaluate(alevels) < vf.evaluate(blevels)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private double samplePoint(int ind, OrdinalPartialValueFunction vf) {
+		double[] vals = vf.getValues();
+		double lb = vals[ind-1];
+		double ub = vals[ind+1];
+		
+		return lb + (rng.nextDouble() * (ub - lb));
+	}
+
+	private void setLastWeight(WeightedOrdinalValueFunction vf) {
+		double[] w = vf.getWeights();
+		double sum = 0.0;
+		for (int i=0;i<w.length-1;i++) {
+			sum += w[i];
+		}
+		vf.setWeight(w.length-1, 1.0 - sum);
+	}
+
+	private double sampleWeight(int curPartVFind, double[] w) {
+		double sum = 0.0;
+		for (int i=0;i<w.length-1;i++) {
+			if (i != curPartVFind) {
+				sum += w[i];
+			}
+		}		
+		return rng.nextDouble() * (1.0 - sum);
+	}
+
+	private int[] getPartialVFSizes(List<OrdinalPartialValueFunction> levels) {
+		int[] sizes = new int[levels.size()];
+		for (int i=0;i<levels.size();i++) {
+			sizes[i] = levels.get(i).getValues().length;
+		}
+		return sizes;
+	}
+
+	public WeightedOrdinalValueFunction generateStartingPoint() throws InvalidStartingPointException {
+		RejectionValueFunctionSampler rejs = new RejectionValueFunctionSampler(model, 1, MAX_STARTINGPOINT_ITERS);
+		try {
+			rejs.misses = 0;
+			rejs.misses = 0;
+			for (int i=0;i<rejs.vfs.length;i++) {
+				int currentTry = 0;
+				while (currentTry < rejs.maxTries) {
+					WeightedOrdinalValueFunction vf = rejs.sampleValueFunction();
+					if (rejs.isHit(vf)) {
+						rejs.vfs[i] = vf;
+						break;
+					} else {
+						rejs.misses++;
+					}
+					currentTry++;
+				}
+				if (currentTry == rejs.maxTries) {
+					throw new SamplingException("No sample found within " + rejs.maxTries + " rejection iterations");
+				}
+			}
+		} catch (SamplingException e) {
+			throw new InvalidStartingPointException("Cannot find starting point: infeasible preferences");
+		}
+		
+		FullCardinalValueFunction point = rejs.getValueFunctions()[0];
+		return convertCardinalVFToOrdinal(point);
+	}
+
+	private WeightedOrdinalValueFunction convertCardinalVFToOrdinal(FullCardinalValueFunction point) {
+		WeightedOrdinalValueFunction vf = new WeightedOrdinalValueFunction();
+		double[] w = point.getWeights();
+		
+		int index = 0;
+		for (CardinalPartialValueFunction f : point.getPartialValueFunctions()) {
+			double[] lvls = Arrays.copyOf(f.getEvals(), f.getEvals().length);
+			OrdinalPartialValueFunction of = new OrdinalPartialValueFunction(lvls.length);
+			for (int i=1;i<lvls.length-1;i++) {
+				of.setValue(i, lvls[i] / w[index]);
+			}
+			index++;
+			vf.addValueFunction(of);
+		}
+		vf.setWeights(w);
+		
+		return vf;
+	}
+
+	public WeightedOrdinalValueFunction getStartingPoint() {
+		return startingPoint;
+	}
+
+	public int getMisses() {
+		return misses;
+	}
+
+	public void sample() throws SamplingException {
+		misses = 0;
 		WeightedOrdinalValueFunction currentVF = startingPoint.deepCopy();
 			
 		int nrPartVF = currentVF.getPartialValueFunctions().size();
@@ -138,86 +244,8 @@ public class GibbsValueFunctionSampler extends ValueFunctionSampler {
 		}
 	}
 
-	private boolean failsRejectCriterion(WeightedOrdinalValueFunction vf) {
-		PerformanceMatrix pm = model.getPerfMatrix();		
-		for (PrefPair pref : model.getPrefPairs()) {
-			int[] alevels = pm.getLevelIndices(pref.a);
-			int[] blevels = pm.getLevelIndices(pref.b);
-			if (vf.evaluate(alevels) < vf.evaluate(blevels)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private double samplePoint(int ind, OrdinalPartialValueFunction vf) {
-		double[] vals = vf.getValues();
-		double lb = vals[ind-1];
-		double ub = vals[ind+1];
-		
-		return lb + (rng.nextDouble() * (ub - lb));
-	}
-
-	private void setLastWeight(WeightedOrdinalValueFunction vf) {
-		double[] w = vf.getWeights();
-		double sum = 0.0;
-		for (int i=0;i<w.length-1;i++) {
-			sum += w[i];
-		}
-		vf.setWeight(w.length-1, 1.0 - sum);
-	}
-
-	private double sampleWeight(int curPartVFind, double[] w) {
-		double sum = 0.0;
-		for (int i=0;i<w.length-1;i++) {
-			if (i != curPartVFind) {
-				sum += w[i];
-			}
-		}		
-		return rng.nextDouble() * (1.0 - sum);
-	}
-
-	private int[] getPartialVFSizes(List<OrdinalPartialValueFunction> levels) {
-		int[] sizes = new int[levels.size()];
-		for (int i=0;i<levels.size();i++) {
-			sizes[i] = levels.get(i).getValues().length;
-		}
-		return sizes;
-	}
-
-	public WeightedOrdinalValueFunction generateStartingPoint() throws InvalidStartingPointException {
-		RejectionValueFunctionSampler rejs = new RejectionValueFunctionSampler(model, 1, MAX_STARTINGPOINT_ITERS);
-		try {
-			rejs.sample();
-		} catch (SamplingException e) {
-			throw new InvalidStartingPointException("Cannot find starting point: infeasible preferences");
-		}
-		
-		FullCardinalValueFunction point = rejs.getValueFunctions()[0];
-		return convertCardinalVFToOrdinal(point);
-	}
-
-	private WeightedOrdinalValueFunction convertCardinalVFToOrdinal(FullCardinalValueFunction point) {
-		WeightedOrdinalValueFunction vf = new WeightedOrdinalValueFunction();
-		double[] w = point.getWeights();
-		
-		int index = 0;
-		for (CardinalPartialValueFunction f : point.getPartialValueFunctions()) {
-			double[] lvls = Arrays.copyOf(f.getEvals(), f.getEvals().length);
-			OrdinalPartialValueFunction of = new OrdinalPartialValueFunction(lvls.length);
-			for (int i=1;i<lvls.length-1;i++) {
-				of.setValue(i, lvls[i] / w[index]);
-			}
-			index++;
-			vf.addValueFunction(of);
-		}
-		vf.setWeights(w);
-		
-		return vf;
-	}
-
-	public WeightedOrdinalValueFunction getStartingPoint() {
-		return startingPoint;
+	protected void sampleWeights() {
+		RandomUtil.createSumToOneRand(w);
 	}
 
 }
