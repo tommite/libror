@@ -13,8 +13,12 @@ sample.vfs <- function(performances, preferences,
   vf.sample(ror, updInterval)
 
   list(vfs=vf.allValueFunctions(ror, ncol(performances)),
-       misses=vf.getMisses())
+       misses=vf.getMisses(ror))
 }
+
+vf.getMisses <- function(ror) {
+  .jcall(ror$model, "I", method="getMisses")
+}  
 
 vf.allValueFunctions <- function(ror, nVf) {
   lapply(seq(1, nVf), function(x) {vf.getValueFunctionsForCriterion(ror, x)})

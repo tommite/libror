@@ -19,10 +19,11 @@ to preferences[k,2]}
 \item{thinning}{The thinning factor to use}
 \item{updInterval}{Update interval for printing out current
   iteration. 0 = no information will be printed out}
-\item{sampler}{The sampler to use. 1 = Gibbs, 2 = Rejection}
+\item{sampler}{The sampler to use. 1 = Gibbs, 2 = rejection}
 }
-\value{A list where element [[i]] are the value functions for the i'th
-  criterion, one function per row}
+\value{Named tuple, where 'vfs' is a list where element [[i]] are the
+  value functions for the i'th criterion, one function per row and
+  'misses' contains the amount of misses during value function sampling.}
 \keyword{robust}
 \seealso{rorsmaa,utagms,ror-package}
 \examples{
