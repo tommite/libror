@@ -3,8 +3,8 @@ library(ror)
 performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)
 
-## Sample a few value functions with thinning 20
-vfs <- sample.vfs.gibbs(performances, preferences, 10, 20);
+## Sample a few value functions with thinning 20, Gibbs sampler
+vfs <- sample.vfs(performances, preferences, 10, 20, 1);
 
 ## Necessary relation
 utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
