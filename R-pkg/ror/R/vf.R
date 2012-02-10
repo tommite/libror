@@ -1,6 +1,15 @@
-sample.vfs <- function(performances, preferences,
-                       nr=10000, thinning=1, updInterval=1000,
-                       sampler=1) {
+sample.vfs.rejection <- function(performances, preferences,
+                       nr=10000, updInterval=1000) {
+  do.sample(performances, preferences, nr, thinning=1, updInterval, sampler=2)
+}
+
+
+sample.vfs.gibbs <- function(performances, preferences,
+                       nr=10000, thinning=1, updInterval=1000) {
+  do.sample(performances, preferences, nr, thinning, updInterval, sampler=1)  
+}
+
+do.sample <- function(performances, preferences, nr, thinning, updInterval, sampler) {    
   stopifnot(nr > 0)
   stopifnot(thinning > 0)
   

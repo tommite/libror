@@ -23,7 +23,7 @@
   Multiple Criteria Decision Support. Submitted manuscript.
 }
 \keyword{robust}
-\seealso{rorsmaa,utagms,sample.vfs}
+\seealso{rorsmaa,utagms,sample.vfs.gibbs,sample.vfs.rejection}
 \examples{
 # Set Java VM memory use to 2g not to run out of heap space
 options( java.parameters = "-Xmx2g" )
@@ -44,5 +44,5 @@ print(ror$rai)
 cat(ror$misses, "misses while generating 10k value functions")
 
 ## Sample some value functions
-vfs <- sample.vfs(performances, preferences, nr=10, thinning=2)
+vfs <- sample.vfs.gibbs(performances, preferences, nr=10, thinning=2)
 }

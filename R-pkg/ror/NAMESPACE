@@ -2,4 +2,6 @@ import("rJava")
 import("ROI")
 export("rorsmaa")
 export("utagms")
-export("sample.vfs")
+export("sample.vfs.gibbs")
+export("sample.vfs.rejection")
+
