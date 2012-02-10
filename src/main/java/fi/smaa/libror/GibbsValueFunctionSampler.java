@@ -19,7 +19,7 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 		init(thinning, startingPoint);
 	}
 	
-	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) throws InvalidStartingPointException {
+	public GibbsValueFunctionSampler(RORModel model, int count, int thinning) throws SamplingException {
 		super(model, count);
 		startingPoint = generateStartingPoint();
 		init(thinning, startingPoint);
@@ -88,14 +88,10 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 		return sizes;
 	}
 
-	public FullValueFunction generateStartingPoint() throws InvalidStartingPointException {
+	public FullValueFunction generateStartingPoint() throws SamplingException {
 		RejectionValueFunctionSampler sampler = new RejectionValueFunctionSampler(model, 1, MAX_STARTINGPOINT_ITERS);
-		try {
-			sampler.sample();
-			return sampler.getValueFunctions()[0];
-		} catch (SamplingException e) {
-			throw new InvalidStartingPointException(e.getMessage());
-		}
+		sampler.sample();
+		return sampler.getValueFunctions()[0];
 	}
 
 	public FullValueFunction getStartingPoint() {

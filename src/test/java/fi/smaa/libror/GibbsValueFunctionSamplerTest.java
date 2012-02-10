@@ -105,13 +105,13 @@ public class GibbsValueFunctionSamplerTest {
 	}
 	
 	@Test
-	public void testGenerateStartingPoint() throws InvalidStartingPointException {
+	public void testGenerateStartingPoint() throws SamplingException {
 		FullValueFunction point = s.generateStartingPoint();
 		assertTrue(point.evaluate(a1inds) > point.evaluate(a2inds));
 	}
 	
-	@Test(expected=InvalidStartingPointException.class)
-	public void testGenerateStartingPointInfeasible() throws InvalidStartingPointException {
+	@Test(expected=SamplingException.class)
+	public void testGenerateStartingPointInfeasible() throws SamplingException {
 		double[][] data = new double[][]{
 				{1,1,1},
 				{0,0,0}};
