@@ -4,4 +4,4 @@ export("rorsmaa")
 export("utagms")
 export("sample.vfs.gibbs")
 export("sample.vfs.rejection")
-
+export("maximalvectors")
