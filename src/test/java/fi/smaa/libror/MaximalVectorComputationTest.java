@@ -17,24 +17,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.smaa.libror.r;
+package fi.smaa.libror;
+
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
+import org.junit.Before;
+import org.junit.Test;
 
-public class RHelper {
+public class MaximalVectorComputationTest {
 
-	public static RealMatrix rArrayMatrixToRealMatrix(double[] matrix, int nRows) {
-		assert(nRows > 0);
-		int nCols = matrix.length / nRows;
-		assert(matrix.length == nRows * nCols);
-		RealMatrix perfMatrix = new Array2DRowRealMatrix(nRows, nCols);
-		for (int i=0;i<nRows;i++) {
-			for (int j=0;j<nCols;j++) {
-				perfMatrix.setEntry(i, j, matrix[i*nCols + j]);
-			}
-		}
-		return perfMatrix;
+	private RealMatrix data;
+
+	@Before
+	public void setUp() {
+		data = new Array2DRowRealMatrix(new double[][]{
+				{1.0, 2.0, 3.0},
+				{1.0, 2.0, 2.0},
+				{2.0, 1.0, 3.0}
+		});
 	}
-
+	
+	@Test
+	public void testCompute() {
+		RealMatrix exp = new Array2DRowRealMatrix(new double[][]{
+				{1.0, 2.0, 3.0},
+				{2.0, 1.0, 3.0}
+		});
+		
+		assertEquals(exp, MaximalVectorComputation.computeBEST(data));
+	}
+	
 }
