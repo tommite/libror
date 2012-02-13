@@ -1,6 +1,7 @@
 maximalvectors <- function(performances) {
   mvc <- mvc.create(performances)
-  mvc.computeBEST(mvc)
+  inds <- mvc.computeBESTindices(mvc)
+  performances[inds,]
 }
 
 mvc.create <- function(perfMat) {
@@ -9,9 +10,10 @@ mvc.create <- function(perfMat) {
   return(mvc)
 }
 
-mvc.computeBEST <- function(mvc) {
-  .jcall(mvc,
-         "[[D",
-         method="computeBEST",
+mvc.computeBESTindices <- function(mvc) {
+  mvind <- .jcall(mvc,
+         "[I",
+         method="computeBESTindices",
          simplify=TRUE)
+  return(mvind)
 }

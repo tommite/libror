@@ -69,6 +69,66 @@ public class MaximalVectorComputation {
 		
 		return listOfRowsToMatrix(results);
 	}
+	
+	
+	/**
+	 * Implements the Best algorithm as described in Godfrey & al., VLDB Journal, 2007.
+	 * 
+	 * Returns indices of the rows from the original matrix.
+	 * 
+	 * @param mat The matrix of values (each row = 1 vector of input)
+	 * 
+	 * @return Matrix containing rows from the input s.t. none are dominated
+	 */
+	public static int[] computeBESTindices(RealMatrix mat) {		
+		LinkedList<Integer> list = matrixToListOfIndices(mat);
+		LinkedList<Integer> results = new LinkedList<Integer>();
+		
+		while (list.size() > 0) {
+			Iterator<Integer> iter = list.iterator();
+			Integer b = iter.next(); // Get the first
+			iter.remove();
+			while (iter.hasNext()) { // Find a max
+				Integer t = iter.next();
+				if (dominates(mat.getRowVector(b), mat.getRowVector(t))) {
+					iter.remove();
+				} else if(dominates(mat.getRowVector(t), mat.getRowVector(b))) {
+					iter.remove();
+					b = t;
+				}
+			}
+			results.add(b);
+			iter = list.iterator();
+			while (iter.hasNext()) { // Clean up
+				Integer t = iter.next();
+				if (dominates(mat.getRowVector(b), mat.getRowVector(t))) {
+					iter.remove();
+				}
+			}
+		}
+		
+		return listOfIntegersToIntArray(results);
+	}	
+
+	private static int[] listOfIntegersToIntArray(LinkedList<Integer> results) {
+		int[] res = new int[results.size()];
+		int index = 0;
+		for (Integer in : results) {
+			res[index] = in;
+			index++;
+		}
+		return res;
+	}
+
+
+	private static LinkedList<Integer> matrixToListOfIndices(RealMatrix mat) {
+		LinkedList<Integer> list = new LinkedList<Integer>();
+		for (int i=0;i<mat.getRowDimension();i++) {
+			list.add(i);
+		}
+		return list;
+	}
+
 
 	private static RealMatrix listOfRowsToMatrix(LinkedList<RealVector> results) {
 		RealMatrix res = new Array2DRowRealMatrix(results.size(), results.getFirst().getDimension());
