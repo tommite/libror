@@ -42,6 +42,10 @@ public class MaximalVectorComputationRFacade {
 	}
 	
 	public int[] computeBESTindices() {
-		return MaximalVectorComputation.computeBESTindices(mat);
+		int[] inds = MaximalVectorComputation.computeBESTindices(mat);
+		for (int i=0;i<inds.length;i++) { // transform to R indices (starting from 1)
+			inds[i] = inds[i] + 1; 
+		}
+		return inds;
 	}
 }

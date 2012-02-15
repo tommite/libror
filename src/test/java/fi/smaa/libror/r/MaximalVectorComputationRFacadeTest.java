@@ -54,6 +54,6 @@ public class MaximalVectorComputationRFacadeTest {
 	@Test
 	public void testComputeBESTIndices() {
 		MaximalVectorComputationRFacade fac = new MaximalVectorComputationRFacade(data);
-		Assert.assertArrayEquals(new int[]{0, 2}, fac.computeBESTindices());
+		Assert.assertArrayEquals(new int[]{1, 3}, fac.computeBESTindices()); // indices starting from 1
 	}
 }
