@@ -26,7 +26,8 @@ import org.apache.commons.math.linear.RealVector;
 
 public class RejectionValueFunctionSampler extends MCValueFunctionSampler {
 
-	private int maxTries = 10000000;
+	public static final int DEFAULT_MAX_ITERS = 10000000; 
+	private int maxTries;
 
 	/**
 	 * Construct a new sampler with the given performance matrix. The alternatives are in rows, and evaluations in columns.
@@ -35,7 +36,7 @@ public class RejectionValueFunctionSampler extends MCValueFunctionSampler {
 	 * @param count the amount of functions to sample, > 0
 	 */
 	public RejectionValueFunctionSampler(RORModel model, int count) {
-		super(model, count);
+		this(model, count, DEFAULT_MAX_ITERS);
 	}
 	
 	public RejectionValueFunctionSampler(RORModel model, int count, int maxIters) {

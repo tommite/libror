@@ -27,7 +27,7 @@ import org.apache.commons.math.linear.RealVector;
 
 public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 	
-	public static final int MAX_STARTINGPOINT_ITERS = 10000;
+	public static final int MAX_STARTINGPOINT_ITERS = RejectionValueFunctionSampler.DEFAULT_MAX_ITERS;
 	private int thinning;
 	private FullValueFunction startingPoint;
 	
