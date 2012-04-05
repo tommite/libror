@@ -146,7 +146,7 @@ public class MaximalVectorComputation {
 	 * @param v2
 	 * @return true, if v1 \succ v2, false otherwise
 	 */
-	private static boolean dominates(RealVector v1, RealVector v2) {
+	public static boolean dominates(RealVector v1, RealVector v2) {
 		assert(v1.getDimension() == v2.getDimension());
 		
 		boolean largerFound = false;
