@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.decision-deck.org/xmcda3/uta"
+	xmlns:x3="http://www.decision-deck.org/xmcda3" xmlns:uta="http://www.decision-deck.org/xmcda3/uta"
+	elementFormDefault="unqualified">
+
+	<import namespace="http://www.decision-deck.org/xmcda3"
+		schemaLocation="https://github.com/tommite/xmcda3-entities/raw/master/src/main/xsd/xmcda3_types.xsd"></import>
+
+	<element name="utagmsInput">
+		<complexType>
+			<sequence>
+				<element name="alternatives" type="x3:alternativeSetType" />
+				<element name="performances" type="x3:valuedRelationType" />				
+				<element name="preferences" type="x3:binaryRelationType" />
+			</sequence>
+		</complexType>
+
+		<key name="alternativeKey">
+			<selector xpath="alternatives/alternative" />
+			<field xpath="id" />
+		</key>
+		<keyref name="preferencesAlternative1KeyRef" refer="uta:alternativeKey">
+			<selector xpath="preferences/valuedPair" />
+			<field xpath="from/@ref" />
+		</keyref>
+		<keyref name="preferencesAlternative2KeyRef" refer="uta:alternativeKey">
+			<selector xpath="performances/valuedPair" />
+			<field xpath="to/@ref" />
+		</keyref>
+	</element>
+</schema>
