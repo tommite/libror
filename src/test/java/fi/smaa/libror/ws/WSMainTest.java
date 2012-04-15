@@ -1,5 +1,7 @@
 package fi.smaa.libror.ws;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -25,6 +27,12 @@ public class WSMainTest {
 		String input = Resources.toString(url, Charsets.UTF_8);
 
 		RORModel model = WSMain.processInput(input);
-		// checks
+		assertEquals(2, model.getNrAlternatives());
+		assertEquals(2, model.getNrCriteria());
+		assertArrayEquals(new int[]{1, 0}, model.getPerfMatrix().getLevelIndices(0));
+		assertArrayEquals(new int[]{0, 1}, model.getPerfMatrix().getLevelIndices(1));
+		assertEquals(0, model.getPrefPairs().get(0).a);
+		assertEquals(1, model.getPrefPairs().get(0).b);
+		assertEquals(1, model.getPrefPairs().size());
 	}
 }
