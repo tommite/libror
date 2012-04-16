@@ -1,9 +1,0 @@
-<xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config">
-	<!-- http://svn.apache.org/viewvc/xmlbeans/trunk/src/configschema/schema/xmlconfig.xsd?view=markup -->
-
-	<!-- Use the "namespace" element to map a namespace to the Java package 
-		name that should be generated. -->
-	<xb:namespace uri="http://www.decision-deck.org/xmcda3">
-		<xb:package>org.decision_deck.xmcda3.xsd</xb:package>
-	</xb:namespace>
-</xb:config>

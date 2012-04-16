@@ -6,53 +6,11 @@
 	<name>libror</name>
 	<version>0.8</version>
 
-	<repositories>
-		<repository>
-			<id>maven2-repository.dev.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/2/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>ibiblio</id>
-			<name>ibiblio Repository for Maven</name>
-			<url>http://www.ibiblio.org/maven/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>apache-snapshots</id>
-			<name>Apache Snapshot repository for Maven</name>
-			<url>http://people.apache.org/repo/m2-snapshot-repository</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>drugis.org</id>
-			<name>drugis.org Maven 2 Repository</name>
-			<url>http://drugis.org/mvn</url>
-			<layout>default</layout>
-		</repository>
-	</repositories>
-
 	<dependencies>
-		<dependency>
-			<groupId>args4j</groupId>
-			<artifactId>args4j</artifactId>
-			<version>2.0.8</version>
-		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>11.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>xalan</groupId>
-			<artifactId>xalan</artifactId>
-			<version>2.7.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -104,21 +62,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>xmlbeans-maven-plugin</artifactId>
-				<version>2.3.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>xmlbeans</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<javaSource>1.5</javaSource>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
