@@ -72,9 +72,9 @@ buildBaseLPModel <- function(perf, preferences, strictVF, strongPrefs) {
     for (i in 1:nrow(preferences)) {
       prefConst <- c()
       if (strongPrefs) {
-        prefConst <- buildStrongPreferenceConstraint(preferences[i,1], preferences[1,2], altVars)
+        prefConst <- buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
       } else {
-        prefConst <- buildWeakPreferenceConstraint(preferences[i,1], preferences[1,2], altVars)
+        prefConst <- buildWeakPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
       }
       allConst <- combineConstraints(allConst, prefConst);
     }
