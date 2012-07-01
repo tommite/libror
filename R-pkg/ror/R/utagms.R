@@ -21,6 +21,9 @@ checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPr
   if (a == b) {
     return(TRUE)
   }
+  if (any(apply(preferences, 1, all.equal, c(a, b)) == TRUE)) { # pref set
+    return(TRUE)
+  }
   altVars <- buildAltVariableMatrix(perf)  
   baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
 
