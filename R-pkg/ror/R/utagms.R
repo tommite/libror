@@ -21,9 +21,6 @@ checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPr
   if (a == b) {
     return(TRUE)
   }
-  if (any(apply(preferences, 1, all.equal, c(a, b)) == TRUE)) { # pref set
-    return(TRUE)
-  }
   altVars <- buildAltVariableMatrix(perf)  
   baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
 
@@ -39,8 +36,10 @@ checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPr
   lp <- OP(objective=obj, constraints=roiConst, maximum=TRUE)
   ret <- ROI_solve(lp, .solver)
 
+#  cat("a", a, "b", b, "code", ret$status$code, "objval", ret$objval, "\n")
+
   if (necessary == TRUE) {
-    return(ret$status$code != 0 || ret$objval <= 0)
+    return(ret$status$code != 0 || ret$objval <= 1E-10)
   } else { # possible
     return(ret$status$code == 0 && ret$objval > 0)
   }
@@ -124,7 +123,7 @@ buildEpsilonStrictlyPositiveConstraint <- function(perf) {
 
   lhs <- rep(0, nrVars)
   lhs[length(lhs)] = 1
-  return(list(lhs=lhs, dir=">=", rhs=1E-7))
+  return(list(lhs=lhs, dir=">=", rhs=1E-10))
 }
 
 buildAllVariablesLessThan1Constraint <- function(perf) {
