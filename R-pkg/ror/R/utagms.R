@@ -1,9 +1,9 @@
-utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE) {
+utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE, strongPrefs=TRUE) {
   rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
 
   for (i in 1:nrow(rel)) {
     for(j in 1:nrow(rel)) {
-      rel[i,j] = checkRelation(performances, preferences, i, j, necessary=necessary, strictVF=strictVF)
+      rel[i,j] = checkRelation(performances, preferences, i, j, necessary=necessary, strictVF=strictVF, strongPrefs=strongPrefs)
     }
   }
   if (!is.null(rownames(performances))) {
@@ -13,15 +13,16 @@ utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE) {
   return(rel)
 }
 
-checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALSE) {
+checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPrefs) {
   ## check vars
   stopifnot(is.logical(necessary))
   stopifnot(is.logical(strictVF))
+  stopifnot(is.logical(strongPrefs))
   if (a == b) {
     return(TRUE)
   }
   altVars <- buildAltVariableMatrix(perf)  
-  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF)
+  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
 
   addConst <- c()
   if (necessary == TRUE) {
@@ -35,8 +36,10 @@ checkRelation <- function(perf, preferences, a, b, necessary=TRUE, strictVF=FALS
   lp <- OP(objective=obj, constraints=roiConst, maximum=TRUE)
   ret <- ROI_solve(lp, .solver)
 
+#  cat("a", a, "b", b, "code", ret$status$code, "objval", ret$objval, "\n")
+
   if (necessary == TRUE) {
-    return(ret$status$code != 0 || ret$objval <= 0)
+    return(ret$status$code != 0 || ret$objval <= 1E-10)
   } else { # possible
     return(ret$status$code == 0 && ret$objval > 0)
   }
@@ -56,7 +59,7 @@ buildObjectiveFunction <- function(perf) {
 ## preferences: an n x 2 matrix, where each row (a, b) means
 ## that a is strictly preferred to b.
 ## strictVF = TRUE -> value functions strictly increasing (instead of monotonous increasing)
-buildBaseLPModel <- function(perf, preferences, strictVF=FALSE) {
+buildBaseLPModel <- function(perf, preferences, strictVF, strongPrefs) {
   altVars <- buildAltVariableMatrix(perf)
 
   c1 <- buildMonotonousConstraints(perf, strictVF=strictVF)
@@ -69,7 +72,13 @@ buildBaseLPModel <- function(perf, preferences, strictVF=FALSE) {
 
   if (is.matrix(preferences)) {
     for (i in 1:nrow(preferences)) {
-      allConst <- combineConstraints(allConst, buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars))
+      prefConst <- c()
+      if (strongPrefs) {
+        prefConst <- buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
+      } else {
+        prefConst <- buildWeakPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
+      }
+      allConst <- combineConstraints(allConst, prefConst);
     }
   }
   return(allConst)
@@ -114,7 +123,7 @@ buildEpsilonStrictlyPositiveConstraint <- function(perf) {
 
   lhs <- rep(0, nrVars)
   lhs[length(lhs)] = 1
-  return(list(lhs=lhs, dir=">=", rhs=1E-7))
+  return(list(lhs=lhs, dir=">=", rhs=1E-10))
 }
 
 buildAllVariablesLessThan1Constraint <- function(perf) {
