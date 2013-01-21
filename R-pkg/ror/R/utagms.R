@@ -101,22 +101,6 @@ buildWeakPreferenceConstraint <- function(a, b, altVars) {
   return(list(lhs=lhs, dir=">=", rhs=0))
 }
 
-combineConstraints <- function(...) {
-  allConst = list(...)
-
-  lhs <- c()
-  dir <- c()
-  rhs <- c()
-
-  for (const in allConst) {
-    lhs <- rbind(lhs, const$lhs)
-    dir <- c(dir, const$dir)
-    rhs <- c(rhs, const$rhs)
-  }
-
-  return(list(lhs=lhs, dir=dir, rhs=rhs))
-}
-
 buildEpsilonStrictlyPositiveConstraint <- function(perf) {
   levels <- getLevels(perf)
   nrVars <- getNrVars(levels)
