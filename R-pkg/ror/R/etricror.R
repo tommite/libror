@@ -15,7 +15,7 @@ etricror <- function(performances, profiles, assignments, necessary=TRUE) {
       rel[i,j] = checkETRICRelation(performances, profiles, assignments, i, j, necessary=necessary)
     }
   }
-    
+  
   if (!is.null(rownames(performances))) {
     rownames(rel) <- rownames(performances)
   }
@@ -39,23 +39,13 @@ buildBaseModelVariableMatrix <- function(performances, profiles, assignments) {
   nAlts <- nrow(performances)
   nCrit <- ncol(performances)
   nAssignments <- nrow(assignments)
-  nCats <- nrow(profiles) + 2
+  nCats <- nrow(profiles)
   
-  nCol <- (nCrit * nAlts * nCats) + (nCrit * 2) + (nAssignments  * 2) + 3
-
   b1 <- buildB1Constraint(nAlts, nCrit, nAssignments, nCats)
   b2 <- buildB2Constraint(nAlts, nCrit, nAssignments, nCats)
-  b2 <- buildB3Constraint(nAlts, nCrit, nAssignments, nCats)
-}
-
-buildB3Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
-  lhs1 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
-  lhs1[getLambdaIndex(nAlts, nCrit, nCats)] = 1
-  lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
-  lhs2[getLambdaIndex(nAlts, nCrit, nCats)] = 1
-
-  rhs = c(0.5, 1.0)
-  return(list(lhs=rbind(lhs1, lhs2), dir=c(">=", "<="), rhs=rhs))
+  b3 <- buildB3Constraint(nAlts, nCrit, nAssignments, nCats)
+  b4 <- buildB4Constraint(nAlts, nCrit, nAssignments, nCats)
+  b5 <- buildB5Constraint(nAlts, nCrit, nAssignments, nCats)
 }
 
 buildB1Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
@@ -69,9 +59,9 @@ buildB1Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
 buildB2Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
   res <- c()
 
-  qMinus1 <- nCats - 3
-
-  for (h in seq(1:qMinus1)) {
+  tMinus1 <- nCats - 1
+  
+  for (h in 1:tMinus1) {
     lhs <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
     for (j in seq(1 : nCrit)) {
       varIndex <- getCjBhBh1Index(nCrit, nAlts, nCats, j, h)
@@ -83,12 +73,81 @@ buildB2Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
     lhs[getLambdaIndex(nAlts, nCrit, nCats)] = -1
     res <- rbind(res, lhs)
   }
-  return(list(lhs=res, dir=rep("<=", qMinus1), rhs=rep(0, qMinus1)))
+  return(list(lhs=res, dir=rep("<=", nCats), rhs=rep(0, tMinus1)))
+}
+
+buildB3Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
+  lhs1 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+  lhs1[getLambdaIndex(nAlts, nCrit, nCats)] = 1
+  lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+  lhs2[getLambdaIndex(nAlts, nCrit, nCats)] = 1
+
+  rhs = c(0.5, 1.0)
+  return(list(lhs=rbind(lhs1, lhs2), dir=c(">=", "<="), rhs=rhs))
+}
+
+buildB4Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
+  lhsRes <- c()
+  rhsRes <- c()
+
+  for (j in 1 : nCrit) {
+    lhs1 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+    lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+
+    lhs1[getEpsilonIndex(nAlts, nCrit, nCats)] = 1
+    lhs1[getWjIndex(j)] = -1
+    
+    lhs2[getWjIndex(j)] = 1
+
+    lhsRes <- rbind(lhsRes, lhs1, lhs2)
+    rhsRes <- rbind(rhsRes, 0, 0.5)
+  }
+  return(list(lhs=lhsRes, dir=rep("<=", nCrit*2), rhs=rhsRes))
+}
+
+## phi is a vector of function objects (1 for each criterion)
+buildB5Constraint <- function(performances, profiles, nAssignments, phi) {
+  
+  nAlts <- nrow(performances)
+  nCats <- nrow(profiles) + 2
+  nCrit <- ncol(performances)
+  
+  stopifnot(length(phi) == nCrit)
+  
+  lhsRes <- c()
+
+  nrRows <- 0
+  for (j in 1 : nCrit) {
+    for (aInd in 1 : nAlts) {
+      for (bInd in 1 : nCats) {
+        lhs1 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+        lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+        indAB <- getCjABIndex(j, aInd, bInd, nAlts, nCats, nCrit)
+        indBA <- getCjBAIndex(j, aInd, bInd, nAlts, nCats, nCrit)
+        
+        lhs1[indAB] = 1
+        lhs1[getWjIndex(j)] = -1 * phi[j](performances[aInd,j], profiles[bInd,j])
+        
+        lhs2[indBA] = 1
+        lhs2[getWjIndex(j)] = -1 * phi[j](profiles[bInd,j], performances[aInd,j])
+        lhsRes <- rbind(lhsRes, lhs1, lhs2)
+
+        nrRows = nrRows + 2
+      }
+    }
+    for (h in 1:nCats) {
+      lhs <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+      lhs[getWjIndex(j)] = -1 * phi[j](profiles[h,j], profiles[h+1,j])
+      lhs[getCjBhBh1Index(nCrit, nAlts, nCats, j, h)]
+      
+      lhsRes <- rBind(lhsRes, lhs)
+    }    
+  }
+  return(list(lhs=lhsRes, dir=rep("=", nCrit*2), rhs=rep(0, nrRows)))
 }
 
 getLambdaIndex <- function(nAlts, nCrit, nCats) {
-  stopifnot(nCats > 3)
-  return (getCjBhBh1Index(nCrit, nAlts, nCats, nCrit, nCats-3) + 1)
+  return (nCrit + nCrit * nAlts * nCats * 2 + nCrit * (nCats-1) + 1)
 }
 
 getEpsilonIndex <- function(nAlts, nCrit, nCats) {
@@ -96,29 +155,29 @@ getEpsilonIndex <- function(nAlts, nCrit, nCats) {
 }
 
 getCjBhBh1Index <- function (nCrit, nAlts, nCats, j, h) {
-  stopifnot(nCats > 3)
-  offset <- nCrit + getNrCjABA(nCrit, nAlts, nCats)
-  return(offset + ((h-1) * nCrit) + j)
+  offset <- nCrit +  (nCrit * nAlts * nCats * 2)
+  tMinus1 <- nCats - 1
+  return(offset + (j-1) * tMinus1 + h)
 }
 
 ## order is j1a1b1, j1a1b2, j2a1b1, ...
 getCjABIndex <- function(j, aInd, bInd, nAlts, nCats, nCrit) {
-  stopifnot(nCats > 3)
-  offset <- (nAlts * nCats) * (j-1)
-  index <- nCats * (aInd - 1) + bInd
-  return (nCrit + (offset + index))
+  stopifnot(bInd <= nCats && bInd > 0)
+  stopifnot(aInd <= nAlts && aInd > 0)
+  stopifnot(j <= nCrit && j > 0)
+  
+  offset <- nCrit
+  index <- (j - 1) * nCats * nAlts + (aInd - 1) * nCats + bInd
+  return (offset + index)
 }
 
 getCjBAIndex <- function(j, aInd, bInd, nAlts, nCats, nCrit) {
-  stopifnot(nCats > 3)
-  
-  offset <- (nAlts * nCats) * (j-1)
-  index <- nCats * (aInd - 1) + bInd
-  return (nCrit + (nAlts * nCats * j) + (offset + index))
-}
+  stopifnot(bInd <= nCats && bInd > 0)
+  stopifnot(aInd <= nAlts && aInd > 0)
+  stopifnot(j <= nCrit && j > 0)
 
-getNrCjABA <- function(nCrit, nAlts, nCats) {
-  return (nCrit * nAlts * nCats * 2)
+  offset <- nCrit + (nCrit * nAlts * nCats)
+  return (offset + (j - 1) * nCats * nAlts + (aInd - 1) * nCats + bInd)
 }
 
 getWjIndex <- function(j) {
@@ -126,5 +185,5 @@ getWjIndex <- function(j) {
 }
 
 getNrBaseVars <- function(nAlts, nCrit, nAssignments, nCats) {
-  return(nCrit + nCrit*nCats*nAlts*2 + ((nCats - 3) * nCrit) + 1 + 1)
+  return(getEpsilonIndex(nAlts=nAlts, nCrit=nCrit, nCats=nCats))
 }
