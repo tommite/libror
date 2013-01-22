@@ -1,3 +1,6 @@
-stopifnot(getCjABIndex(1, 3, 2, 3, 2) == 6)
-stopifnot(getCjBAIndex(2, 3, 2, 3, 2) == 24)
+stopifnot(getWjIndex(2) == 2)
+stopifnot(getCjABIndex(1, 3, 2, 3, 4, 2) == 12)
+stopifnot(getCjBAIndex(2, 3, 2, 3, 4, 2) == 48)
 stopifnot(getNrCjABA(2, 3, 4) == 48)
+stopifnot(getCjBhBh1Index(2, 2, 4, 2, 1) == (2 + getNrCjABA(2, 2, 4) + 2))
+stopifnot(getCjBhBh1Index(2, 2, 4, 2, 1) + 1 == getLambdaIndex(2, 2, 4))
