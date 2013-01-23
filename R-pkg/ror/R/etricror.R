@@ -665,20 +665,27 @@ buildEUModel <- function(performances, profiles, assignments, phi) {
   nAssignments <- nrow(assignments)
   nCats <- nrow(profiles)
 
-  eu1 <- buildEU1Constraint(performances, profiles, assignments, phi)
-  eu2 <- buildEU2Constraint(performances, profiles, assignments, phi)
-  eu3 <- buildEU3Constraint(performances, profiles, assignments, phi)
-  eu41 <- buildEU41Constraint(performances, profiles, assignments, phi)
-  eu42 <- buildEU42Constraint(performances, profiles, assignments, phi)
-  eu43 <- buildEU43Constraint(performances, profiles, assignments, phi)
+  allConst <- c()
+  for (a in 1:nAssignments) {
+    allConst <- combineConstraintsMatrix(allConst, buildEUModel1Ass(a, performances, profiles, assignments, phi))
+  }
   
-  allConst <- combineConstraintsMatrix(eu1, eu2, eu3, eu41, eu42, eu43)
   colnames(allConst$lhs) <- getColNames(nAlts, nCrit, nAssignments, nCats)
   
   return(allConst)
 }
 
-buildEU43Constraint <- function(performances, profiles, assignments, phi) {    
+buildEUModel1Ass <- function (a, performances, profiles, assignments, phi) {
+  eu1 <- buildEU1Constraint(a, performances, profiles, assignments, phi)
+  eu2 <- buildEU2Constraint(a, performances, profiles, assignments, phi)
+  eu3 <- buildEU3Constraint(a, performances, profiles, assignments, phi)
+  eu41 <- buildEU41Constraint(a, performances, profiles, assignments, phi)
+  eu42 <- buildEU42Constraint(a, performances, profiles, assignments, phi)
+  eu43 <- buildEU43Constraint(a, performances, profiles, assignments, phi)
+  return(combineConstraintsMatrix(eu1, eu2, eu3, eu41, eu42, eu43))
+}
+
+buildEU43Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -688,18 +695,16 @@ buildEU43Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = -rowBA
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = -rowBA
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
+    row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU43", nr)
@@ -713,7 +718,7 @@ buildEU43Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEU42Constraint <- function(performances, profiles, assignments, phi) {    
+buildEU42Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -723,18 +728,16 @@ buildEU42Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = -rowAB
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = -rowAB
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
+    row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU42", nr)
@@ -748,7 +751,7 @@ buildEU42Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEU41Constraint <- function(performances, profiles, assignments, phi) {    
+buildEU41Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -758,17 +761,16 @@ buildEU41Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      rowAB = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
-      rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = rowBA - rowAB
-      row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    rowAB = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
+    rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = rowBA - rowAB
+    row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = -M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU41", nr)
@@ -782,7 +784,7 @@ buildEU41Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEU3Constraint <- function(performances, profiles, assignments, phi) {    
+buildEU3Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -792,18 +794,16 @@ buildEU3Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      rowAB = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
-      rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = rowBA - rowAB
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    rowAB = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
+    rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = rowBA - rowAB
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
+    row[getAssignmentVarIndex(aInd, FALSE, nAlts, nCrit, nCats)] = M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU3", nr)
@@ -817,7 +817,7 @@ buildEU3Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEU1Constraint <- function(performances, profiles, assignments, phi) {    
+buildEU1Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -827,15 +827,13 @@ buildEU1Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      row = buildCBArow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    row = buildCBArow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU1", nr)
@@ -849,7 +847,7 @@ buildEU1Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEU2Constraint <- function(performances, profiles, assignments, phi) {    
+buildEU2Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -859,16 +857,14 @@ buildEU2Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd < nCats) {
-      row = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = 1
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd < nCats) {
+    row = buildCABrow(aInd, (cInd+1), nAlts, nCrit, nAssignments, nCats)
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = 1
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EU2", nr)
@@ -888,20 +884,60 @@ buildELModel <- function(performances, profiles, assignments, phi) {
   nAssignments <- nrow(assignments)
   nCats <- nrow(profiles)
 
-  el1 <- buildEL1Constraint(performances, profiles, assignments, phi)
-  el2 <- buildEL2Constraint(performances, profiles, assignments, phi)
-  el3 <- buildEL3Constraint(performances, profiles, assignments, phi)
-  el41 <- buildEL41Constraint(performances, profiles, assignments, phi)
-  el42 <- buildEL42Constraint(performances, profiles, assignments, phi)
-  el43 <- buildEL43Constraint(performances, profiles, assignments, phi)
+  allConst <- c()
   
-  allConst <- combineConstraintsMatrix(el1, el2, el3, el41, el42, el43)
+  for (a in 1:nAssignments) {
+    allConst <- combineConstraintsMatrix(allConst, buildELModel1Ass(a, performances, profiles, assignments, phi))
+  }
   colnames(allConst$lhs) <- getColNames(nAlts, nCrit, nAssignments, nCats)
   
   return(allConst)
 }
 
-buildEL43Constraint <- function(performances, profiles, assignments, phi) {    
+buildELModel1Ass <- function(a, performances, profiles, assignments, phi) {
+  el1 <- buildEL1Constraint(a, performances, profiles, assignments, phi)
+  el2 <- buildEL2Constraint(a, performances, profiles, assignments, phi)
+  el3 <- buildEL3Constraint(a, performances, profiles, assignments, phi)
+  el41 <- buildEL41Constraint(a, performances, profiles, assignments, phi)
+  el42 <- buildEL42Constraint(a, performances, profiles, assignments, phi)
+  el43 <- buildEL43Constraint(a, performances, profiles, assignments, phi)
+  return(combineConstraintsMatrix(el1, el2, el3, el41, el42, el43))
+}
+
+buildNecModel <- function(aInd, h, performances, profiles, assignments, phi, left) {
+  nAlts <- nrow(performances)
+  nCats <- nrow(profiles)
+  nCrit <- ncol(performances)
+  nAssignments <- nrow(assignments)
+
+  fakeAs = assignments
+  fakeAs[1,1] = aInd
+  
+  if (left) {
+    stopifnot(h < nCats)
+    fakeAs[1,2] = h+1
+
+    m <- buildELModel1Ass(1, performances, profiles, fakeAs, phi)
+    index <- getAssignmentVarIndex(1, TRUE, nAlts, nCrit, nCats)
+    vars <- m$lhs[,index]
+    m$lhs[,index] = 0
+    m$lhs[,getNecessaryVarIndex(nAlts, nCrit, nCats, nAssignments, TRUE)] = t(vars)
+  } else {
+    stopifnot(h > 1)
+    
+    fakeAs[1,2] = h-1
+    m <- buildEUModel1Ass(1, performances, profiles, fakeAs, phi)
+    index <- getAssignmentVarIndex(1, FALSE, nAlts, nCrit, nCats)
+    vars <- m$lhs[,index]
+    m$lhs[,index] = 0
+    m$lhs[,getNecessaryVarIndex(nAlts, nCrit, nCats, nAssignments, FALSE)] = t(vars)
+  }
+
+  colnames(m$lhs) <- getColNames(nAlts, nCrit, nAssignments, nCats)
+  return(m)
+}
+
+buildEL43Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -911,18 +947,16 @@ buildEL43Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = -rowBA
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    rowBA = buildCBArow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = -rowBA
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
       row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+    row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EL43", nr)
@@ -936,7 +970,7 @@ buildEL43Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEL42Constraint <- function(performances, profiles, assignments, phi) {    
+buildEL42Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -946,18 +980,16 @@ buildEL42Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      row = -rowAB
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    row = -rowAB
       row[getLambdaIndex(nAlts, nCrit, nCats)] = 1
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
+    row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
       res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+    nr <- nr + 1
   }
 
   rnames <- rep("EL42", nr)
@@ -971,7 +1003,7 @@ buildEL42Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEL41Constraint <- function(performances, profiles, assignments, phi) {    
+buildEL41Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -981,17 +1013,15 @@ buildEL41Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      rowBA = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
-      row = rowAB - rowBA
-      row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    rowBA = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
+    row = rowAB - rowBA
+    row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = -M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EL41", nr)
@@ -1005,7 +1035,7 @@ buildEL41Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEL3Constraint <- function(performances, profiles, assignments, phi) {    
+buildEL3Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -1015,18 +1045,17 @@ buildEL3Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
-      rowBA = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
-      row = rowAB - rowBA
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
-      row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = M
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    rowAB = buildCABrow(aInd, (cInd), nAlts, nCrit, nAssignments, nCats)
+    rowBA = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
+    row = rowAB - rowBA
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = -1
+    row[getAssignmentVarIndex(aInd, TRUE, nAlts, nCrit, nCats)] = M
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EL3", nr)
@@ -1040,7 +1069,7 @@ buildEL3Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEL1Constraint <- function(performances, profiles, assignments, phi) {    
+buildEL1Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -1050,15 +1079,13 @@ buildEL1Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      row = buildCABrow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    row = buildCABrow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EL1", nr)
@@ -1072,7 +1099,7 @@ buildEL1Constraint <- function(performances, profiles, assignments, phi) {
   return(list(lhs=res, dir=dir, rhs=rhs))
 }
 
-buildEL2Constraint <- function(performances, profiles, assignments, phi) {    
+buildEL2Constraint <- function(i, performances, profiles, assignments, phi) {    
   nAlts <- nrow(performances)
   nCats <- nrow(profiles)
   nCrit <- ncol(performances)
@@ -1082,16 +1109,14 @@ buildEL2Constraint <- function(performances, profiles, assignments, phi) {
 
   res <- matrix(nrow=0, ncol=getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
   nr <- 0
-  for (i in 1:nrow(assignments)) {
-    aInd = assignments[i, 1]
-    cInd = assignments[i, 2]
-    if (cInd > 1) {
-      row = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
-      row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
-      row[getEpsilonIndex(nAlts, nCrit, nCats)] = 1
-      res <-  rbind(res, row)
-      nr <- nr + 1
-    }
+  aInd = assignments[i, 1]
+  cInd = assignments[i, 2]
+  if (cInd > 1) {
+    row = buildCBArow(aInd, (cInd-1), nAlts, nCrit, nAssignments, nCats)
+    row[getLambdaIndex(nAlts, nCrit, nCats)] = -1
+    row[getEpsilonIndex(nAlts, nCrit, nCats)] = 1
+    res <-  rbind(res, row)
+    nr <- nr + 1
   }
 
   rnames <- rep("EL2", nr)
@@ -1158,6 +1183,7 @@ getColNames <- function(nAlts, nCrit, nAssignments, nCats) {
     res = c(res, paste("pos", i, "L", sep=''), paste("pos", i, "R", sep=''))
   }
 
+  res = c(res, "necL", "necR")
 
   return(res)
 }
@@ -1305,6 +1331,15 @@ getEpsilonIndex <- function(nAlts, nCrit, nCats) {
   return (getLambdaIndex(nAlts, nCrit, nCats) + 1)
 }
 
+getNecessaryVarIndex <- function(nAlts, nCrit, nCats, nAssignments, left) {
+  offset = getEpsilonIndex(nAlts, nCrit, nCats) + 2 * nAssignments + 12
+  if (left) {
+    return (offset + 1)
+  } else {
+    return (offset + 2)
+  }
+}
+
 getPossibleVarIndex <- function(varIndex, nAlts, nCrit, nCats, nAssignments) {
   offset = getEpsilonIndex(nAlts, nCrit, nCats) + 2 * nAssignments
   return (offset + varIndex)
@@ -1356,7 +1391,7 @@ getWjIndex <- function(j) {
 
 getNrBaseVars <- function(nAlts, nCrit, nAssignments, nCats) {
   return(getEpsilonIndex(nAlts=nAlts, nCrit=nCrit, nCats=nCats)
-         + 2 * nAssignments + 12)
+         + 2 * nAssignments + 12 + 2)
 }
 
 ## p is preference threshold
