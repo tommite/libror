@@ -49,7 +49,7 @@ buildBaseModel <- function(performances, profiles, assignments, phi) {
   b5 <- buildB5Constraint(performances, profiles, nAssignments, phi)
 
   allConst <- combineConstraintsMatrix(b1, b2, b3, b4, b5)
-  colnames(allConst$lhs) <- getColNames(nalts, nCrit, nAssignments, nCats)
+  colnames(allConst$lhs) <- getColNames(nAlts, nCrit, nAssignments, nCats)
   return(allConst)
 }
 
@@ -65,9 +65,9 @@ getColNames <- function(nAlts, nCrit, nAssignments, nCats) {
   }
 
   for (j in 1:nCrit) {
-    for (a in 1:nAlts) {
-      for (b in 1:nCats) {
-        res = c(res, paste('c', j, '(b', a, ',a', b, ')', sep=''))
+    for (b in 1:nCats) {    
+      for (a in 1:nAlts) {
+        res = c(res, paste('c', j, '(b', b, ',a', a, ')', sep=''))
       }
     }
   }
@@ -166,7 +166,7 @@ buildB4Constraint <- function(nAlts, nCrit, nAssignments, nCats) {
 buildB5Constraint <- function(performances, profiles, nAssignments, phi) {
   
   nAlts <- nrow(performances)
-  nCats <- nrow(profiles) + 2
+  nCats <- nrow(profiles)
   nCrit <- ncol(performances)
   
   stopifnot(length(phi) == nCrit)
@@ -178,33 +178,44 @@ buildB5Constraint <- function(performances, profiles, nAssignments, phi) {
     for (aInd in 1 : nAlts) {
       for (bInd in 1 : nCats) {
         lhs1 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
-        lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
         indAB <- getCjABIndex(j, aInd, bInd, nAlts, nCats, nCrit)
-        indBA <- getCjBAIndex(j, aInd, bInd, nAlts, nCats, nCrit)
-        
         lhs1[indAB] = 1
-        lhs1[getWjIndex(j)] = -1 * phi[j](performances[aInd,j], profiles[bInd,j])
+        lhs1[getWjIndex(j)] = -1 * phi[[j]](performances[aInd,j], profiles[bInd,j])
         
-        lhs2[indBA] = 1
-        lhs2[getWjIndex(j)] = -1 * phi[j](profiles[bInd,j], performances[aInd,j])
-        lhsRes <- rbind(lhsRes, lhs1, lhs2)
-
-        nrRows = nrRows + 2
+        lhsRes <- rbind(lhsRes, lhs1)
+        nrRows = nrRows + 1
       }
     }
-    for (h in 1:nCats) {
+  }
+  for (j in 1 : nCrit) {
+    for (bInd in 1 : nCats) {
+      for (aInd in 1 : nAlts) {
+        lhs2 <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
+        indBA <- getCjBAIndex(j, aInd, bInd, nAlts, nCats, nCrit)        
+        lhs2[indBA] = 1
+        lhs2[getWjIndex(j)] = -1 * phi[[j]](profiles[bInd,j], performances[aInd,j])
+        
+        lhsRes <- rbind(lhsRes, lhs2)
+        nrRows = nrRows + 1
+      }
+    }
+  }
+  for(j in 1:nCrit) {
+    for (h in 1:(nCats-1)) {
       lhs <- rep(0, getNrBaseVars(nAlts, nCrit, nAssignments, nCats))
-      lhs[getWjIndex(j)] = -1 * phi[j](profiles[h,j], profiles[h+1,j])
-      lhs[getCjBhBh1Index(nCrit, nAlts, nCats, j, h)]
+      lhs[getWjIndex(j)] = -1 * phi[[j]](profiles[h,j], profiles[h+1,j])
+      lhs[getCjBhBh1Index(nCrit, nAlts, nCats, j, h)] = 1
       
-      lhsRes <- rBind(lhsRes, lhs)
+      lhsRes <- rbind(lhsRes, lhs)
+      nrRows = nrRows + 1
     }    
   }
-  rownames(lhsRes) <- rep("B5", nrow(lhsRes))
-  dir <- as.matrix(rep("=", nCrit*2))
-  rownames(dir) <- rep("B5", nrow(dir))
+  rnames <- paste("B5.", seq(1:nrRows), sep='')
+  rownames(lhsRes) <- rnames
+  dir <- as.matrix(rep("=", nrRows))
+  rownames(dir) <- rnames
   rhs <- as.matrix(rep(0, nrRows))
-  rownames(rhs) <- rep("B5", nrow(rhs))
+  rownames(rhs) <- rnames
   return(list(lhs=lhsRes, dir=dir, rhs=rhs))
 }
 
@@ -217,6 +228,9 @@ getEpsilonIndex <- function(nAlts, nCrit, nCats) {
 }
 
 getCjBhBh1Index <- function (nCrit, nAlts, nCats, j, h) {
+  stopifnot(h > 0 && h < nCats)
+  stopifnot(j > 0 && j <= nCrit)
+  
   offset <- nCrit +  (nCrit * nAlts * nCats * 2)
   tMinus1 <- nCats - 1
   return(offset + (j-1) * tMinus1 + h)
@@ -239,7 +253,7 @@ getCjBAIndex <- function(j, aInd, bInd, nAlts, nCats, nCrit) {
   stopifnot(j <= nCrit && j > 0)
 
   offset <- nCrit + (nCrit * nAlts * nCats)
-  return (offset + (j - 1) * nCats * nAlts + (aInd - 1) * nCats + bInd)
+  return (offset + (j - 1) * nCats * nAlts + (bInd - 1) * nAlts + aInd)
 }
 
 getWjIndex <- function(j) {
@@ -268,7 +282,7 @@ buildPhi <- function(q, qMult = 0, p, pMult = 0, ascending=TRUE) {
     } else if (diff >= pref) {
       return(0)
     } else {
-      return ((diff - indif) / (pref - indif))
+      return ((pref-diff) / (pref - indif))
     }
   })
 }
