@@ -19,19 +19,3 @@ combineConstraints <- function(...) {
 
   return(list(lhs=lhs, dir=dir, rhs=rhs))
 }
-
-combineConstraintsMatrix <- function(...) {
-  allConst = list(...)
-
-  lhs <- c()
-  dir <- c()
-  rhs <- c()
-
-  for (const in allConst) {
-    lhs <- rbind(lhs, const$lhs)
-    dir <- rbind(dir, const$dir)
-    rhs <- rbind(rhs, const$rhs)
-  }
-
-  return(list(lhs=lhs, dir=dir, rhs=rhs))
-}
