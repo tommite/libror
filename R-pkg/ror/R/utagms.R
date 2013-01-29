@@ -1,5 +1,11 @@
+MINEPS <- 1E-10
+
 utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE, strongPrefs=TRUE) {
   rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
+  
+  if (!checkConsistency(performances, preferences, necessary, strictVF, strongPrefs)) {
+    stop("Model inconsistent")
+  }
 
   for (i in 1:nrow(rel)) {
     for(j in 1:nrow(rel)) {
@@ -11,6 +17,28 @@ utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE, st
     colnames(rel) <- rownames(performances)
   }
   return(rel)
+}
+
+checkConsistency <- function(perf, preferences, necessary, strictVF, strongPrefs) {
+  ## check vars
+  stopifnot(is.logical(necessary))
+  stopifnot(is.logical(strictVF))
+  stopifnot(is.logical(strongPrefs))
+  
+  altVars <- buildAltVariableMatrix(perf)  
+  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
+
+  ret <- solveModel(perf, baseModel)
+
+  print (ret$objval)
+  return(ret$status$code == 0 && ret$objval >= MINEPS)
+}
+
+solveModel <- function(perf, model) {
+  obj <- L_objective(buildObjectiveFunction(perf))
+  roiConst <- L_constraint(model$lhs, model$dir, model$rhs)
+  lp <- OP(objective=obj, constraints=roiConst, maximum=TRUE)
+  ROI_solve(lp, .solver)
 }
 
 checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPrefs) {
@@ -31,17 +59,14 @@ checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPr
     addConst <- buildWeakPreferenceConstraint(a, b, altVars)
   }
   allConst <- combineConstraints(baseModel, addConst)
-  obj <- L_objective(buildObjectiveFunction(perf))
-  roiConst <- L_constraint(allConst$lhs, allConst$dir, allConst$rhs)
-  lp <- OP(objective=obj, constraints=roiConst, maximum=TRUE)
-  ret <- ROI_solve(lp, .solver)
 
+  ret <- solveModel(perf, allConst)
 #  cat("a", a, "b", b, "code", ret$status$code, "objval", ret$objval, "\n")
 
   if (necessary == TRUE) {
-    return(ret$status$code != 0 || ret$objval <= 1E-10)
+    return(ret$status$code != 0 || ret$objval < MINEPS)
   } else { # possible
-    return(ret$status$code == 0 && ret$objval > 0)
+    return(ret$status$code == 0 && ret$objval >= MINEPS)
   }
 }
 
@@ -107,7 +132,7 @@ buildEpsilonStrictlyPositiveConstraint <- function(perf) {
 
   lhs <- rep(0, nrVars)
   lhs[length(lhs)] = 1
-  return(list(lhs=lhs, dir=">=", rhs=1E-10))
+  return(list(lhs=lhs, dir=">=", rhs=MINEPS))
 }
 
 buildAllVariablesLessThan1Constraint <- function(perf) {

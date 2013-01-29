@@ -19,31 +19,16 @@
 
 package fi.smaa.libror;
 
-import fi.smaa.libror.RORModel.PrefPair;
+import static org.junit.Assert.assertArrayEquals;
 
-public class AcceptanceCriterion {
+import org.junit.Test;
 
-	private RORModel model;
+public class ArrayCopyTest {
 
-	public AcceptanceCriterion(RORModel model) {
-		this.model = model;
-	}
-	
-	/**
-	 * Checks whether the given value function passes the acceptance criterion.
-	 * 
-	 * @param vf the value function to assess
-	 * @return true, if vf passess the criterion, false otherwise
-	 */
-	public boolean check(FullValueFunction vf) {
-		PerformanceMatrix pm = model.getPerfMatrix();		
-		for (PrefPair pref : model.getPrefPairs()) {
-			int[] alevels = pm.getLevelIndices(pref.a);
-			int[] blevels = pm.getLevelIndices(pref.b);
-			if (vf.evaluate(alevels) < vf.evaluate(blevels)) {
-				return false;
-			}
-		}
-		return true;
+	@Test
+	public void testCopyOf() {
+		double[] arr = new double[] {1.0, 4.5, 3.4};
+		
+		assertArrayEquals(arr, ArrayCopy.copyOf(arr), 0.00001);
 	}
 }

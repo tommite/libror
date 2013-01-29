@@ -1,7 +1,7 @@
 /*
  * This file is part of libror.
  * libror is distributed from http://smaa.fi/libror
- * Copyright (C) 2011-12 Tommi Tervonen.
+ * Copyright (C) 2011-13 Tommi Tervonen.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 package fi.smaa.libror;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class FullValueFunction implements DeepCopiable<FullValueFunction> {
@@ -93,7 +92,7 @@ public class FullValueFunction implements DeepCopiable<FullValueFunction> {
 		for (PartialValueFunction pf : vfs) {
 			f.addValueFunction(pf.deepCopy());
 		}
-		f.weights = Arrays.copyOf(weights, weights.length);
+		f.weights = ArrayCopy.copyOf(weights);
 		return f;
 	}
 

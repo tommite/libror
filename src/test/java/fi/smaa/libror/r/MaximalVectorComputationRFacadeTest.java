@@ -1,7 +1,7 @@
 /*
  * This file is part of libror.
  * libror is distributed from http://smaa.fi/libror
- * Copyright (C) 2011-12 Tommi Tervonen.
+ * Copyright (C) 2011-13 Tommi Tervonen.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 /*
  * This file is part of libror.
  * libror is distributed from http://smaa.fi/libror
- * Copyright (C) 2011-12 Tommi Tervonen.
+ * Copyright (C) 2011-13 Tommi Tervonen.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 
 package fi.smaa.libror;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math.linear.RealVector;
@@ -139,7 +138,7 @@ public class GibbsValueFunctionSampler extends MCValueFunctionSampler {
 					assert(curVFind < (nrPartVF-1));
 					double[] weights = currentVF.getWeights();
 					double newW = sampleWeight(curVFind, weights);
-					double[] oldWeights = Arrays.copyOf(weights, weights.length);
+					double[] oldWeights = ArrayCopy.copyOf(weights);
 					currentVF.setWeight(curVFind, newW);
 					setLastWeight(currentVF); // set last weight so that they sum to 1.0
 					if (!acceptance.check(currentVF)) {
