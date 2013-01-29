@@ -30,7 +30,6 @@ checkConsistency <- function(perf, preferences, necessary, strictVF, strongPrefs
 
   ret <- solveModel(perf, baseModel)
 
-  print (ret$objval)
   return(ret$status$code == 0 && ret$objval >= MINEPS)
 }
 
