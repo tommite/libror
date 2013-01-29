@@ -51,8 +51,8 @@ TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
 ## T T F
 ## T T F
 ## T T T
-stopifnot(posrel == matrix(c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
-}
+stopifnot(posrel == matrix(c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE,
+## TRUE, TRUE), ncol=3, byrow=TRUE))
 
 \dontrun{
 ## a3 > a2 and a2 > a3
@@ -61,5 +61,5 @@ preferences <- matrix(c(3, 2, 2, 3), ncol=2, byrow=TRUE)
 ## Error as the model is infeasible
 necrel <- utagms(performances, preferences, necessary=TRUE,
 strictVF=TRUE, strongPrefs=TRUE)
-  
+}
 }
