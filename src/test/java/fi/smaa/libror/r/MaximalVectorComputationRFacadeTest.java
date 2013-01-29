@@ -19,6 +19,8 @@
 
 package fi.smaa.libror.r;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
 import org.junit.Assert;
@@ -56,4 +58,14 @@ public class MaximalVectorComputationRFacadeTest {
 		MaximalVectorComputationRFacade fac = new MaximalVectorComputationRFacade(data);
 		Assert.assertArrayEquals(new int[]{1, 3}, fac.computeBESTindices()); // indices starting from 1
 	}
+	
+	@Test
+	public void testComputeBESTIndicesBug() {
+		double[] data = new double[]{0.1823507, 0.5408093, 0.1292226, 0.5232321, 0.1604821, 0.2366909, 0.7595968, 0.4699517, 0.7583132,
+				 0.2964752, 0.4170541, 0.3765545, 0.1676054, 0.5357071, 0.4587448};
+		MaximalVectorComputationRFacade fac = new MaximalVectorComputationRFacade(RHelper.rArrayMatrixToRealMatrix(data, 3));
+		
+		assertArrayEquals(new int[]{1, 2, 3}, fac.computeBESTindices());
+	}
+
 }

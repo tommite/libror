@@ -19,7 +19,7 @@
 
 package fi.smaa.libror;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.RealMatrix;
@@ -47,6 +47,17 @@ public class MaximalVectorComputationTest {
 		});
 		
 		assertEquals(exp, MaximalVectorComputation.computeBEST(data));
+	}
+	
+	@Test
+	public void testBug() {
+		RealMatrix data = new Array2DRowRealMatrix(new double[][]{
+				{0.1823507, 0.5232321, 0.7595968, 0.2964752, 0.1676054},
+				{0.5408093, 0.1604821, 0.4699517, 0.4170541, 0.5357071},
+				{0.1292226, 0.2366909, 0.7583132, 0.3765545, 0.4587448}
+		});
+		
+		assertArrayEquals(new int[]{0, 1, 2}, MaximalVectorComputation.computeBESTindices(data));
 	}
 	
 }

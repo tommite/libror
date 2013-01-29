@@ -80,7 +80,7 @@ public class MaximalVectorComputation {
 	 * 
 	 * @return Matrix containing rows from the input s.t. none are dominated
 	 */
-	public static int[] computeBESTindices(RealMatrix mat) {		
+	public static int[] computeBESTindices(RealMatrix mat) {
 		LinkedList<Integer> list = matrixToListOfIndices(mat);
 		LinkedList<Integer> results = new LinkedList<Integer>();
 		

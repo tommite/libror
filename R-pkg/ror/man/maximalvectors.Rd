@@ -19,23 +19,10 @@ and n criteria}
 options( java.parameters = "-Xmx2g" )
 library(ror)
 
-performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
-
+## Test with pareto-optimal alternatives
+performances <- matrix(c(0.1823507, 0.5232321, 0.7595968, 0.2964752,
+0.1676054, 0.5408093, 0.1604821,0.4699517, 0.4170541, 0.5357071,
+0.1292226, 0.2366909, 0.7583132, 0.3765545, 0.4587448), ncol=5, byrow=TRUE)
 nonDominated <- maximalvectors(performances)
-
-## Function needed to generate pareto-optimal alternatives
-randomPointFromHypersphere <- function(ncrit) {
-  rns <- c()
-  while(TRUE) {
-    rns <- rnorm(ncrit)
-    if (all(rns > 0)) {
-      break
-    }
-  }
-  mul <- 1 / sqrt(sum(rns * rns))
-  return(rns * mul)
-}
-
-performances <- t(replicate(10, randomPointFromHypersphere(5)))  # 10 alts, 5 crit
-stopifnot(nrow(nonDominated) == 10)
+stopifnot(nrow(nonDominated) == 3)
 }

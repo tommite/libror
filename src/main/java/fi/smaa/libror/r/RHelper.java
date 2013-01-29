@@ -25,13 +25,17 @@ import org.apache.commons.math.linear.RealMatrix;
 public class RHelper {
 
 	public static RealMatrix rArrayMatrixToRealMatrix(double[] matrix, int nRows) {
-		assert(nRows > 0);
+		if (nRows < 1) {
+			throw new IllegalArgumentException("PRECOND violation: nRows < 1");
+		}
 		int nCols = matrix.length / nRows;
-		assert(matrix.length == nRows * nCols);
+		if (matrix.length != nRows * nCols) {
+			throw new IllegalArgumentException("PRECOND violation: matrix.length != nRows * nCols");
+		}
 		RealMatrix perfMatrix = new Array2DRowRealMatrix(nRows, nCols);
 		for (int i=0;i<nRows;i++) {
 			for (int j=0;j<nCols;j++) {
-				perfMatrix.setEntry(i, j, matrix[i*nCols + j]);
+				perfMatrix.setEntry(i, j, matrix[j*nRows + i]);
 			}
 		}
 		return perfMatrix;

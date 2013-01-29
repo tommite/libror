@@ -28,8 +28,8 @@ public class MaximalVectorComputationRFacade {
 	private RealMatrix mat;
 
 	public MaximalVectorComputationRFacade(double[] matrix, int nRows) {
-		RealMatrix mat = RHelper.rArrayMatrixToRealMatrix(matrix, nRows);
-		this.mat = mat;
+		RealMatrix mymat = RHelper.rArrayMatrixToRealMatrix(matrix, nRows);
+		this.mat = mymat;
 	}
 	
 	// for testing purposes
