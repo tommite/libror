@@ -1,21 +1,35 @@
 library(ror)
 
-performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
+randomPointFromHypersphere <- function(ncrit) {
+  rns <- c()
+  while(TRUE) {
+    rns <- rnorm(ncrit)
+    if (all(rns > 0)) {
+      break
+    }
+  }
+  mul <- 1 / sqrt(sum(rns * rns))
+  return(rns * mul)
+}
+
+performances <- t(replicate(10, randomPointFromHypersphere(5)))  # 10 alts, 5 crit
 preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)
 
 ## Sample a few value functions with thinning 20, Gibbs sampler
 vfs <- sample.vfs.gibbs(performances, preferences, 10, 20);
 
 ## Necessary relation
-utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
+nec <- utagms(performances, preferences, necessary=TRUE, strictVF=TRUE)
+print(nec)
 ## Possible relation
-utagms(performances, preferences, necessary=FALSE, strictVF=TRUE)
+pos <- utagms(performances, preferences, necessary=FALSE, strictVF=TRUE)
+print(pos)
 
 ## RORSMAA giving the POIs and RAIs
 ror <- rorsmaa(performances, preferences)
 print(ror$poi)
 print(ror$rai)
-cat(ror$misses, "misses while generating 10k value functions")
+cat(ror$misses, "misses while generating 10k value functions\n")
 
 ## Example with 3 alternatives and 3 criteria
 perf2 <- matrix(c(1.0, 1.0, 1.0, 2.0, 1.0, 1.1, 2.0, 0.5, 3.0), ncol=3, byrow=TRUE)
