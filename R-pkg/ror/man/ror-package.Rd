@@ -29,7 +29,20 @@
 options( java.parameters = "-Xmx2g" )
 library(ror)
 
-performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
+## Function needed to generate pareto-optimal alternatives
+randomPointFromHypersphere <- function(ncrit) {
+  rns <- c()
+  while(TRUE) {
+    rns <- rnorm(ncrit)
+    if (all(rns > 0)) {
+      break
+    }
+  }
+  mul <- 1 / sqrt(sum(rns * rns))
+  return(rns * mul)
+}
+
+performances <- t(replicate(10, randomPointFromHypersphere(5)))  # 10 alts, 5 crit
 preferences <- matrix(c(1, 2, 4, 5, 7, 8, 1, 3), ncol=2, byrow=TRUE)
 
 ## Necessary relation

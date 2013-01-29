@@ -44,15 +44,13 @@ strictVF=FALSE, strongPrefs=TRUE)
 ## T F F
 ## T T F
 ## T T T
-stopifnot(necrel == matrix(c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE,
-TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
+stopifnot(necrel == matrix(c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
 
 ## Sanity check, the possible relation should be
 ## T T F
 ## T T F
 ## T T T
-stopifnot(posrel == matrix(c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE,
-## TRUE, TRUE), ncol=3, byrow=TRUE))
+stopifnot(posrel == matrix(c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), ncol=3, byrow=TRUE))
 
 \dontrun{
 ## a3 > a2 and a2 > a3

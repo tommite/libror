@@ -22,4 +22,20 @@ library(ror)
 performances <- matrix(runif(n=50), nrow=10) # 10 alts, 5 crit
 
 nonDominated <- maximalvectors(performances)
+
+## Function needed to generate pareto-optimal alternatives
+randomPointFromHypersphere <- function(ncrit) {
+  rns <- c()
+  while(TRUE) {
+    rns <- rnorm(ncrit)
+    if (all(rns > 0)) {
+      break
+    }
+  }
+  mul <- 1 / sqrt(sum(rns * rns))
+  return(rns * mul)
+}
+
+performances <- t(replicate(10, randomPointFromHypersphere(5)))  # 10 alts, 5 crit
+stopifnot(nrow(nonDominated) == 10)
 }

@@ -18,6 +18,7 @@ clean:
 	-rm ../target/${CURJAVAPKG}
 	-rm ${CURPKG}
 	-rm -Rf ror/inst
+	-rm -rf ror.Rcheck
 
 install: all
 	R CMD INSTALL ${CURPKG}
