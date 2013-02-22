@@ -15,8 +15,6 @@ and n criteria}
 of alternatives in performance matrix). Each row
 r is a preference statements meaning that preferences[k,1] is preferred
 to preferences[k,2]}
-\item{necessary}{Whether to compute the necessary relation (TRUE)
-or the possible one (FALSE)}
 }
 \keyword{robust}
 \seealso{utagms,ror-package}

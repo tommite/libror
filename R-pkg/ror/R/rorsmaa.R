@@ -1,4 +1,4 @@
-rorsmaa <- function(performances, preferences, necessary=TRUE) {
+rorsmaa <- function(performances, preferences) {
   ror <- rorsmaa.create(performances)
   if (is.matrix(preferences)) {
     for (i in 1:nrow(preferences)) {
@@ -52,6 +52,3 @@ rorsmaa.getPOIs <- function(ror) {
   colnames(poi) <- ror$rownames
   return(poi)
 }
-
-
-
