@@ -1,5 +1,7 @@
 import("rJava")
 import("ROI")
+import("igraph")
+S3method(plot, binary.relation)
 export("rorsmaa")
 export("utagms")
 export("utagms.strong.necessary")

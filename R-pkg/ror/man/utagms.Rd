@@ -62,6 +62,10 @@ necrel <- utagms(performances, strongPrefs=NULL, indifPrefs=strongPrefs, necessa
 stopifnot(necrel[2,3] == necrel[3,2] && necrel[3,2] == TRUE)
 
 \dontrun{
+
+## Plot the relation
+plot(necrel)
+
 ## a3 > a2 and a2 > a3
 strongPrefs <- matrix(c(3, 2, 2, 3), ncol=2, byrow=TRUE)
 

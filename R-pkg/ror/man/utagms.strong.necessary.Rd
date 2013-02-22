@@ -43,4 +43,9 @@ strongnec <- utagms.strong.necessary(performances, strongPrefs)
 ## Sanity check, the relation have a3 >^N a2
 stopifnot(strongnec[3,2] == TRUE)
 
+\dontrun{
+## Plot the relation
+plot(strongnec)
+}
+
 }

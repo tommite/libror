@@ -1,7 +1,13 @@
 MINEPS <- 1E-10
 
 utagms.strong.necessary <- function(performances, strongPrefs=NULL, weakPrefs=NULL, indifPrefs=NULL, strictVF=FALSE) {
-  !t(utagms(performances, strongPrefs, weakPrefs, indifPrefs, strictVF, necessary=FALSE))
+  res <- !t(utagms(performances, strongPrefs, weakPrefs, indifPrefs, strictVF, necessary=FALSE))
+  class(res) <- "binary.relation"
+  return(res)
+}
+
+plot.binary.relation <- function(x, layout=igraph::layout.auto, ...) {
+  igraph::plot.igraph(graph.adjacency(x), layout=layout, ...)  
 }
 
 utagms <- function(performances, strongPrefs = NULL, weakPrefs = NULL, indifPrefs = NULL, necessary=TRUE, strictVF=FALSE) {
@@ -21,6 +27,8 @@ utagms <- function(performances, strongPrefs = NULL, weakPrefs = NULL, indifPref
     rownames(rel) <- rownames(performances)
     colnames(rel) <- rownames(performances)
   }
+
+  class(rel) <- "binary.relation"
   return(rel)
 }
 
