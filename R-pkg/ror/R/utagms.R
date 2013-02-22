@@ -1,15 +1,16 @@
 MINEPS <- 1E-10
 
-utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE, strongPrefs=TRUE) {
+utagms <- function(performances, strongPrefs = NULL, weakPrefs = NULL, indifPrefs = NULL, necessary=TRUE, strictVF=FALSE) {
   rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
   
-  if (!checkConsistency(performances, preferences, necessary, strictVF, strongPrefs)) {
-    stop("Model inconsistent")
+  if (!checkConsistency(performances, necessary, strictVF, strongPrefs, weakPrefs, indifPrefs)) {
+    stop("Model infeasible")
   }
 
   for (i in 1:nrow(rel)) {
     for(j in 1:nrow(rel)) {
-      rel[i,j] = checkRelation(performances, preferences, i, j, necessary=necessary, strictVF=strictVF, strongPrefs=strongPrefs)
+      rel[i,j] = checkRelation(performances, i, j, necessary=necessary, strictVF=strictVF,
+           strongPrefs=strongPrefs, weakPrefs=weakPrefs, indifPrefs=indifPrefs)
     }
   }
   if (!is.null(rownames(performances))) {
@@ -19,14 +20,14 @@ utagms <- function(performances, preferences, necessary=TRUE, strictVF=FALSE, st
   return(rel)
 }
 
-checkConsistency <- function(perf, preferences, necessary, strictVF, strongPrefs) {
+checkConsistency <- function(perf, necessary, strictVF, strongPrefs, weakPrefs, indifPrefs) {
   ## check vars
   stopifnot(is.logical(necessary))
   stopifnot(is.logical(strictVF))
-  stopifnot(is.logical(strongPrefs))
   
-  altVars <- buildAltVariableMatrix(perf)  
-  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
+  altVars <- buildAltVariableMatrix(perf)
+  baseModel <- buildBaseLPModel(perf, strictVF=strictVF, strongPrefs=strongPrefs,
+                                weakPrefs=weakPrefs, indifPrefs=indifPrefs)
 
   ret <- solveModel(perf, baseModel)
 
@@ -40,16 +41,15 @@ solveModel <- function(perf, model) {
   ROI_solve(lp, .solver)
 }
 
-checkRelation <- function(perf, preferences, a, b, necessary, strictVF, strongPrefs) {
+checkRelation <- function(perf, a, b, necessary, strictVF, strongPrefs, weakPrefs, indifPrefs) {
   ## check vars
   stopifnot(is.logical(necessary))
   stopifnot(is.logical(strictVF))
-  stopifnot(is.logical(strongPrefs))
   if (a == b) {
     return(TRUE)
   }
   altVars <- buildAltVariableMatrix(perf)  
-  baseModel <- buildBaseLPModel(perf, preferences, strictVF=strictVF, strongPrefs=strongPrefs)
+  baseModel <- buildBaseLPModel(perf, strictVF=strictVF, strongPrefs=strongPrefs, weakPrefs=weakPrefs, indifPrefs=indifPrefs)
 
   addConst <- c()
   if (necessary == TRUE) {
@@ -79,11 +79,11 @@ buildObjectiveFunction <- function(perf) {
 }
 
 
-## perf: performance matrix
-## preferences: an n x 2 matrix, where each row (a, b) means
-## that a is strictly preferred to b.
+## perf: the performance matrix
 ## strictVF = TRUE -> value functions strictly increasing (instead of monotonous increasing)
-buildBaseLPModel <- function(perf, preferences, strictVF, strongPrefs) {
+## *prefs: an n x 2 matrix, where each row (a, b) means
+## that a is [strongly or weakly preferred, or indifferent] to b.
+buildBaseLPModel <- function(perf, strictVF, strongPrefs, weakPrefs, indifPrefs) {
   altVars <- buildAltVariableMatrix(perf)
 
   c1 <- buildMonotonousConstraints(perf, strictVF=strictVF)
@@ -94,17 +94,25 @@ buildBaseLPModel <- function(perf, preferences, strictVF, strongPrefs) {
 
   allConst <- combineConstraints(c1, c2, c3, c4, c5)
 
-  if (is.matrix(preferences)) {
-    for (i in 1:nrow(preferences)) {
-      prefConst <- c()
-      if (strongPrefs) {
-        prefConst <- buildStrongPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
-      } else {
-        prefConst <- buildWeakPreferenceConstraint(preferences[i,1], preferences[i,2], altVars)
-      }
+  if (is.matrix(strongPrefs)) {
+    for (i in 1:nrow(strongPrefs)) {
+      prefConst <- buildStrongPreferenceConstraint(strongPrefs[i,1], strongPrefs[i,2], altVars)
       allConst <- combineConstraints(allConst, prefConst);
     }
   }
+  if (is.matrix(weakPrefs)) {
+    for (i in 1:nrow(weakPrefs)) {
+      prefConst <- buildWeakPreferenceConstraint(weakPrefs[i,1], weakPrefs[i,2], altVars)
+      allConst <- combineConstraints(allConst, prefConst);
+    }
+  }
+  if (is.matrix(indifPrefs)) {
+    for (i in 1:nrow(indifPrefs)) {
+      prefConst <- buildIndifPreferenceConstraint(indifPrefs[i,1], indifPrefs[i,2], altVars)
+      allConst <- combineConstraints(allConst, prefConst);
+    }
+  }
+
   return(allConst)
 }
 
@@ -114,14 +122,21 @@ buildStrongPreferenceConstraint <- function(a, b, altVars) {
   lhs <- altVars[a,]
   lhs[length(lhs)] = -1
   lhs <- lhs - altVars[b,]
-
+  
   return(list(lhs=lhs, dir=">=", rhs=0))
+}
+
+buildIndifPreferenceConstraint <- function(a, b, altVars) {
+  lhs <- altVars[a,]
+  lhs <- lhs - altVars[b,]
+  
+  return(list(lhs=lhs, dir="==", rhs=0))
 }
 
 buildWeakPreferenceConstraint <- function(a, b, altVars) {
   lhs <- altVars[a,]
   lhs <- lhs - altVars[b,]
-
+  
   return(list(lhs=lhs, dir=">=", rhs=0))
 }
 
