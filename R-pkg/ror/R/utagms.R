@@ -1,5 +1,9 @@
 MINEPS <- 1E-10
 
+utagms.strong.necessary <- function(performances, strongPrefs=NULL, weakPrefs=NULL, indifPrefs=NULL, strictVF=FALSE) {
+  !t(utagms(performances, strongPrefs, weakPrefs, indifPrefs, strictVF, necessary=FALSE))
+}
+
 utagms <- function(performances, strongPrefs = NULL, weakPrefs = NULL, indifPrefs = NULL, necessary=TRUE, strictVF=FALSE) {
   rel <- matrix(nrow=nrow(performances), ncol=nrow(performances))
   

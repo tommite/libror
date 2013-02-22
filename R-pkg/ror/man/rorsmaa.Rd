@@ -7,7 +7,7 @@
   assumes ascending preferences, i.e. higher criterion evaluation
   means higher preferability (=better).
 }
-\usage{rorsmaa(performances, preferences, necessary=TRUE)}
+\usage{rorsmaa(performances, preferences)}
 \arguments{
 \item{performances}{m x n performance matrix with m alternatives
 and n criteria}

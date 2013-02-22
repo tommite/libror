@@ -12,10 +12,6 @@ strictVF=FALSE)}
 \arguments{
 \item{performances}{m x n performance matrix with m alternatives
 and n criteria.}
-\item{necessary}{Whether to compute the necessary relation (TRUE)
-or the possible one (FALSE).}
-\item{strictVF}{Whether to use sctrictly increasing (TRUE) or
-  monotonously increasing (FALSE) value functions.}
 \item{strongPrefs}{k x 2 matrix of strong preferences statements (row indices
 of alternatives in the performance matrix). Each row
 r is a preference statements meaning that preferences[k,1] is strongly preferred
@@ -28,6 +24,10 @@ to preferences[k,2].}
   indices of alternatives in the performance matrix). Each row
 r is a preference statements meaning that preferences[k,1] is equally
 preferred to preferences[k,2].}
+\item{necessary}{Whether to compute the necessary relation (TRUE)
+or the possible one (FALSE).}
+\item{strictVF}{Whether to use sctrictly increasing (TRUE) or
+  monotonously increasing (FALSE) value functions.}
 }
 \keyword{robust}
 \seealso{rorsmaa,ror-package}
