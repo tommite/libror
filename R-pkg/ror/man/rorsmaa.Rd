@@ -13,7 +13,7 @@
 and n criteria}
 \item{preferences}{k x 2 matrix of preferences statements (row indices
 of alternatives in performance matrix). Each row
-r is a preference statements meaning that preferences[k,1] is preferred
+r is a preference statements meaning that preferences[k,1] is weakly preferred
 to preferences[k,2]}
 }
 \keyword{robust}
@@ -42,4 +42,11 @@ ror <- rorsmaa(performances, preferences)
 print(ror$poi)
 print(ror$rai)
 cat(ror$misses, "misses while generating 10k value functions\n")
+
+\dontrun{
+## Plot the results
+plot(ror$rai)
+plot(ror$poi)
+}
+
 }

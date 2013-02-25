@@ -1,4 +1,5 @@
 rorsmaa <- function(performances, preferences) {
+  performances <- as.matrix(performances)
   ror <- rorsmaa.create(performances)
   if (is.matrix(preferences)) {
     for (i in 1:nrow(preferences)) {
@@ -14,11 +15,26 @@ rorsmaa <- function(performances, preferences) {
   rai <- rorsmaa.getRAIs(ror)
   misses <- rorsmaa.getMisses(ror)
   
-  return(list(poi=poi, rai=rai, misses=misses))
+  ret <- list(poi=poi, rai=rai, misses=misses)
+  class(ret$poi) <- 'valued.relation'
+  class(ret$rai) <- 'smaa.acceptabilities'
+  return(ret)
+}
+
+plot.smaa.acceptabilities <- function(x, ...) {
+  barplot(t(x), legend=TRUE, col=heat.colors(nrow(x)), ...)
+}
+
+plot.valued.relation <- function(x, ...) {
+  g <- graph.adjacency(x, weighted=TRUE)
+  for (i in V(g)) {
+    g <- delete.edges(g, E(g)[i %--% i])
+  }
+  igraph::plot.igraph(g, edge.label=E(g)$weight, ...)
 }
 
 rorsmaa.create <- function(perfMat) {
-  model <- .jnew("fi/smaa/libror/r/RORSMAARFacade", as.vector(perfMat), as.integer(nrow(perfMat)))
+  model <- .jnew("fi/smaa/libror/r/RORSMAARFacade", as.numeric(perfMat), as.integer(nrow(perfMat)))
   list(model=model, rownames=rownames(perfMat), colnames=colnames(perfMat))
 }
 
