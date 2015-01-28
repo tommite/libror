@@ -5,6 +5,7 @@ Title: Robust Ordinal Regression MCDA library
 Author: Tommi Tervonen
 Maintainer: Tommi Tervonen <tommi@smaa.fi>
 Description: Functions for computing both exact- and stochastic robust ordinal regression, and maximal vectors.
-Depends: R (>= 2.7.0), rJava (>= 0.8-0), ROI (>= 0.0.7), ROI.plugin.glpk (>= 0.0-1), igraph (>= 0.6.4)
+Depends: R (>= 2.7.0), rJava (>= 0.8-0), ROI (>= 0.0.7), igraph (>= 0.6.4)
+Suggests: ROI.plugin.glpk (>= 0.0-1)
 SystemRequirements: Java (>= 1.5)
 License: GPL-3

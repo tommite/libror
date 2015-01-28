@@ -4,7 +4,7 @@
 \docType{package}
 \title{Robust Ordinal Regression MCDA sampler/solver}
 \description{
-  This package implements UTAGMS and RORSMAA MCDA methods
+  Implements UTAGMS and RORSMAA MCDA methods
   for ranking multiple alternatives in terms of multiple criteria.
   The current version assumes ascending preferences, i.e. higher
   criterion evaluation means higher preferability (=better).
